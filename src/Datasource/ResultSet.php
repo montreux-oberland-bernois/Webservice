@@ -57,7 +57,7 @@ class ResultSet implements ResultSetInterface
      *
      * @return array|object
      */
-    public function current()
+    public function current(): mixed
     {
         return $this->_current;
     }
@@ -89,6 +89,14 @@ class ResultSet implements ResultSetInterface
         }
 
         return serialize($this->_results);
+    }
+
+    public function __serialize(): array
+    {
+        while ($this->valid()) {
+            $this->next();
+        }
+        return $this->_results;
     }
 
     /**
