@@ -91,6 +91,9 @@ class ResultSet implements ResultSetInterface
         return serialize($this->_results);
     }
 
+    /**
+     * @return array
+     */
     public function __serialize(): array
     {
         while ($this->valid()) {
@@ -152,6 +155,15 @@ class ResultSet implements ResultSetInterface
     public function unserialize($serialized): void
     {
         $this->_results = unserialize($serialized);
+    }
+
+    /**
+     * @param array $data
+     * @return void
+     */
+    public function __unserialize(array $data): void
+    {
+        $this->_results = $data;
     }
 
     /**
