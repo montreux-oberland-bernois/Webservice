@@ -31,6 +31,9 @@ use Muffin\Webservice\Datasource\Schema;
 use Muffin\Webservice\Model\Exception\MissingResourceClassException;
 use Muffin\Webservice\Webservice\WebserviceInterface;
 use Psr\SimpleCache\CacheInterface;
+use ReflectionFunction;
+use ReflectionNamedType;
+use function Cake\Core\deprecationWarning;
 use function Cake\Core\namespaceSplit;
 
 /**
@@ -600,10 +603,9 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * can override this method in subclasses to modify how `find('all')` works.
      *
      * @param \Muffin\Webservice\Datasource\Query $query The query to find with
-     * @param array $options The options to use for the find
      * @return \Muffin\Webservice\Datasource\Query The query builder
      */
-    public function findAll(Query $query, array $options): Query
+    public function findAll(Query $query): Query
     {
         return $query;
     }
@@ -661,33 +663,29 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * ]
      * ```
      *
-     * @param \Muffin\Webservice\Datasource\Query $query The query to find with
-     * @param array $options The options for the find
      * @return \Muffin\Webservice\Datasource\Query The query builder
      */
-    public function findList(Query $query, array $options): Query
-    {
-        if (isset($options[0])) {
-            $options = $options[0];
-        }
-        $options += [
-            'keyField' => $this->getPrimaryKey(),
-            'valueField' => $this->getDisplayField(),
-            'groupField' => null,
-        ];
+    public function findList(
+        Query $query,
+        Closure|array|string|null $keyField = null,
+        Closure|array|string|null $valueField = null,
+        Closure|array|string|null $groupField = null,
+        string $valueSeparator = ';'
+    ): Query {
+        $keyField ??= $this->getPrimaryKey();
+        $valueField ??= $this->getDisplayField();
 
         $options = $this->_setFieldMatchers(
-            $options,
+            compact('keyField', 'valueField', 'groupField', 'valueSeparator'),
             ['keyField', 'valueField', 'groupField']
         );
 
-        return $query->formatResults(function (CollectionInterface $results) use ($options) {
-            return $results->combine(
+        return $query->formatResults(fn (CollectionInterface $results) =>
+            $results->combine(
                 $options['keyField'],
                 $options['valueField'],
                 $options['groupField']
-            );
-        });
+            ));
     }
 
     /**
@@ -716,13 +714,14 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
             }
 
             $fields = $options[$field];
-            $options[$field] = function ($row) use ($fields) {
+            $glue = $options['valueSeparator'];
+            $options[$field] = function ($row) use ($fields, $glue) {
                 $matches = [];
                 foreach ($fields as $field) {
                     $matches[] = $row[$field];
                 }
 
-                return implode(';', $matches);
+                return implode($glue, $matches);
             };
         }
 
@@ -1039,24 +1038,113 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * Calls a finder method directly and applies it to the passed query,
      * if no query is passed a new one will be created and returned
      *
-     * @param string $type name of the finder to be called
-     * @param \Muffin\Webservice\Datasource\Query $query The query object to apply the finder options to
-     * @param array $options List of options to pass to the finder
+     * @param string $type Name of the finder to be called.
+     * @param \Muffin\Webservice\Datasource\Query $query The query object to apply the finder options to.
+     * @param mixed ...$args Arguments that match up to finder-specific parameters
      * @return \Muffin\Webservice\Datasource\Query
      * @throws \BadMethodCallException If the requested finder cannot be found
      */
-    public function callFinder(string $type, Query $query, array $options = []): Query
+    public function callFinder(string $type, Query $query, mixed ...$args): Query
     {
-        $query->applyOptions($options);
-        $options = $query->getOptions();
         $finder = 'find' . $type;
         if (method_exists($this, $finder)) {
-            return $this->{$finder}($query, $options);
+            return $this->invokeFinder($this->{$finder}(...), $query, $args);
         }
 
-        throw new BadMethodCallException(
-            sprintf('Unknown finder method "%s"', $type)
+        throw new BadMethodCallException(sprintf(
+            'Unknown finder method `%s` on `%s`.',
+            $type,
+            static::class
+        ));
+    }
+
+    /**
+     * @internal
+     * @template TSubject of \Cake\Datasource\EntityInterface|array
+     * @param \Closure $callable Callable.
+     * @param \Muffin\Webservice\Datasource\Query $query The query object.
+     * @param array $args Arguments for the callable.
+     * @return \Muffin\Webservice\Datasource\Query
+     */
+    public function invokeFinder(Closure $callable, Query $query, array $args): Query
+    {
+        $reflected = new ReflectionFunction($callable);
+        $params = $reflected->getParameters();
+        $secondParam = $params[1] ?? null;
+
+        $secondParamType = $secondParam?->getType();
+        $secondParamTypeName = $secondParamType instanceof ReflectionNamedType ? $secondParamType->getName() : null;
+
+        $secondParamIsOptions = (
+            count($params) === 2 &&
+            $secondParam?->name === 'options' &&
+            !$secondParam->isVariadic() &&
+            ($secondParamType === null || $secondParamTypeName === 'array')
         );
+
+        if (($args === [] || isset($args[0])) && $secondParamIsOptions) {
+            // Backwards compatibility of 4.x style finders
+            // with signature `findFoo(SelectQuery $query, array $options)`
+            // called as `find('foo')` or `find('foo', [..])`
+            if (isset($args[0])) {
+                deprecationWarning(
+                    '5.0.0',
+                    'Calling finders with options arrays is deprecated.'
+                    . ' Update your finder methods to used named arguments instead.'
+                );
+                $args = $args[0];
+            }
+            $query->applyOptions($args);
+
+            return $callable($query, $query->getOptions());
+        }
+
+        // Backwards compatibility for 4.x style finders with signatures like
+        // `findFoo(SelectQuery $query, array $options)` called as
+        // `find('foo', key: $value)`.
+        if (!isset($args[0]) && $secondParamIsOptions) {
+            $query->applyOptions($args);
+
+            return $callable($query, $query->getOptions());
+        }
+
+        // Backwards compatibility for core finders like `findList()` called in 4.x
+        // style with an array `find('list', ['valueField' => 'foo'])` instead of
+        // `find('list', valueField: 'foo')`
+        if (isset($args[0]) && is_array($args[0]) && $secondParamTypeName !== 'array') {
+            deprecationWarning(
+                '4.0.0',
+                "Calling `{$reflected->getName()}` finder with options array is deprecated."
+                 . ' Use named arguments instead.'
+            );
+
+            $args = $args[0];
+        }
+
+        if ($args) {
+            $query->applyOptions($args);
+            // Fetch custom args without the query options.
+            $args = $query->getOptions();
+
+            unset($params[0]);
+            $lastParam = end($params);
+            reset($params);
+
+            if ($lastParam === false || !$lastParam->isVariadic()) {
+                $paramNames = [];
+                foreach ($params as $param) {
+                    $paramNames[] = $param->getName();
+                }
+
+                foreach ($args as $key => $value) {
+                    if (is_string($key) && !in_array($key, $paramNames, true)) {
+                        unset($args[$key]);
+                    }
+                }
+            }
+        }
+
+        return $callable($query, ...$args);
     }
 
     /**
