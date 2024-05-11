@@ -10,6 +10,7 @@ use Cake\Event\EventManager;
 use Cake\TestSuite\TestCase;
 use Muffin\Webservice\Datasource\Connection;
 use Muffin\Webservice\Datasource\Query;
+use Muffin\Webservice\Datasource\Query\SelectQuery;
 use Muffin\Webservice\Datasource\Schema;
 use Muffin\Webservice\Model\Endpoint;
 use Muffin\Webservice\Model\Exception\MissingResourceClassException;
@@ -472,7 +473,7 @@ class EndpointTest extends TestCase
     {
         $this->expectException(BadMethodCallException::class);
 
-        $query = $this->getMockBuilder(Query::class)
+        $query = $this->getMockBuilder(SelectQuery::class)
             ->setConstructorArgs([new TestWebservice(), $this->endpoint])
             ->getMock();
 

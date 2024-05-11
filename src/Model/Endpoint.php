@@ -27,6 +27,7 @@ use Exception;
 use Muffin\Webservice\Datasource\Connection;
 use Muffin\Webservice\Datasource\Marshaller;
 use Muffin\Webservice\Datasource\Query;
+use Muffin\Webservice\Datasource\Query\SelectQuery;
 use Muffin\Webservice\Datasource\Schema;
 use Muffin\Webservice\Model\Exception\MissingResourceClassException;
 use Muffin\Webservice\Webservice\WebserviceInterface;
@@ -585,12 +586,12 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      *
      * @param string $type the type of query to perform
      * @param mixed ...$args Arguments that match up to finder-specific parameters
-     * @return \Muffin\Webservice\Datasource\Query
+     * @return \Muffin\Webservice\Datasource\Query\SelectQuery
      * @throws \Exception
      */
-    public function find(string $type = 'all', mixed ...$args): Query
+    public function find(string $type = 'all', mixed ...$args): SelectQuery
     {
-        $query = $this->query()->read();
+        $query = $this->selectQuery();
 
         return $this->callFinder($type, $query, $args);
     }
@@ -657,15 +658,15 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * ]
      * ```
      *
-     * @return \Muffin\Webservice\Datasource\Query The query builder
+     * @return \Muffin\Webservice\Datasource\Query\SelectQuery The query builder
      */
     public function findList(
-        Query $query,
+        SelectQuery $query,
         Closure|array|string|null $keyField = null,
         Closure|array|string|null $valueField = null,
         Closure|array|string|null $groupField = null,
         string $valueSeparator = ';'
-    ): Query {
+    ): SelectQuery {
         $keyField ??= $this->getPrimaryKey();
         $valueField ??= $this->getDisplayField();
 
@@ -842,16 +843,59 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     }
 
     /**
-     * Creates a new Query instance for this repository
+     * Creates a new SelectQuery instance for a table.
+     *
+     * @return \Muffin\Webservice\Datasource\Query\SelectQuery
+     */
+    public function query(): SelectQuery
+    {
+        return $this->selectQuery();
+    }
+
+    /**
+     * Creates a new select query
+     *
+     * @return \Muffin\Webservice\Datasource\Query\SelectQuery
+     */
+    public function selectQuery(): SelectQuery
+    {
+        return new SelectQuery($this->getWebservice(), $this);
+    }
+
+    /**
+     * Creates a new insert query
      *
      * @return \Muffin\Webservice\Datasource\Query
-     * @throws \Exception When non webservice is set
      */
-    public function query(): Query
+    public function insertQuery(): Query
     {
-        $webservice = $this->getWebservice();
+        $query = new Query($this->getWebservice(), $this);
 
-        return new Query($webservice, $this);
+        return $query->action(Query::ACTION_CREATE);
+    }
+
+    /**
+     * Creates a new update query
+     *
+     * @return \Muffin\Webservice\Datasource\Query
+     */
+    public function updateQuery(): Query
+    {
+        $query = new Query($this->getWebservice(), $this);
+
+        return $query->action(Query::ACTION_UPDATE);
+    }
+
+    /**
+     * Creates a new delete query
+     *
+     * @return \Muffin\Webservice\Datasource\Query
+     */
+    public function deleteQuery(): Query
+    {
+        $query = new Query($this->getWebservice(), $this);
+
+        return $query->action(Query::ACTION_DELETE);
     }
 
     /**
@@ -874,7 +918,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
 
         $fields = (array)$fields;
 
-        $res = $this->query()->update()->where($conditions)->set($fields)->execute();
+        $res = $this->updateQuery()->where($conditions)->set($fields)->execute();
 
         if ($res instanceof ResultSetInterface) {
             return $res->count();
@@ -905,7 +949,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      */
     public function deleteAll(mixed $conditions): int
     {
-        $res = $this->query()->delete()->where($conditions)->execute();
+        $res = $this->deleteQuery()->where($conditions)->execute();
 
         if ($res instanceof ResultSetInterface) {
             return $res->count();
@@ -982,9 +1026,9 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
         $data = $entity->extract($this->getSchema()->columns(), true);
 
         if ($entity->isNew()) {
-            $query = $this->query()->create();
+            $query = $this->insertQuery();
         } else {
-            $query = $this->query()->update()->where($entity->extract($primaryColumns));
+            $query = $this->updateQuery()->where($entity->extract($primaryColumns));
         }
         $query->set($data);
 
@@ -1018,7 +1062,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
         $primaryKeys = (array)$this->getPrimaryKey();
         $values = $entity->extract($primaryKeys);
 
-        return (bool)$this->query()->delete()->where(array_combine($primaryKeys, $values))->execute();
+        return (bool)$this->deleteQuery()->where(array_combine($primaryKeys, $values))->execute();
     }
 
     /**
@@ -1039,12 +1083,12 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * if no query is passed a new one will be created and returned
      *
      * @param string $type Name of the finder to be called.
-     * @param \Muffin\Webservice\Datasource\Query $query The query object to apply the finder options to.
+     * @param \Muffin\Webservice\Datasource\Query\SelectQuery $query The query object to apply the finder options to.
      * @param mixed ...$args Arguments that match up to finder-specific parameters
-     * @return \Muffin\Webservice\Datasource\Query
+     * @return \Muffin\Webservice\Datasource\Query\SelectQuery
      * @throws \BadMethodCallException If the requested finder cannot be found
      */
-    public function callFinder(string $type, Query $query, mixed ...$args): Query
+    public function callFinder(string $type, SelectQuery $query, mixed ...$args): SelectQuery
     {
         $finder = 'find' . $type;
         if (method_exists($this, $finder)) {
@@ -1061,11 +1105,11 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     /**
      * @internal
      * @param \Closure $callable Callable.
-     * @param \Muffin\Webservice\Datasource\Query $query The query object.
+     * @param \Muffin\Webservice\Datasource\Query\SelectQuery $query The query object.
      * @param array $args Arguments for the callable.
-     * @return \Muffin\Webservice\Datasource\Query
+     * @return \Muffin\Webservice\Datasource\Query\SelectQuery
      */
-    public function invokeFinder(Closure $callable, Query $query, array $args): Query
+    public function invokeFinder(Closure $callable, SelectQuery $query, array $args): SelectQuery
     {
         $reflected = new ReflectionFunction($callable);
         $params = $reflected->getParameters();
@@ -1153,10 +1197,10 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      *
      * @param string $method The method name that was fired.
      * @param array $args List of arguments passed to the function.
-     * @return \Muffin\Webservice\Datasource\Query
+     * @return \Muffin\Webservice\Datasource\Query\SelectQuery
      * @throws \BadMethodCallException when there are missing arguments, or when and & or are combined.
      */
-    protected function _dynamicFinder(string $method, array $args): Query
+    protected function _dynamicFinder(string $method, array $args): SelectQuery
     {
         $method = Inflector::underscore($method);
         preg_match('/^find_([\w]+)_by_/', $method, $matches);
@@ -1213,10 +1257,10 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      *
      * @param string $method name of the method to be invoked
      * @param array $args List of arguments passed to the function
-     * @return \Cake\Datasource\QueryInterface
+     * @return \Muffin\Webservice\Datasource\Query\SelectQuery
      * @throws \BadMethodCallException If the request dynamic finder cannot be found
      */
-    public function __call(string $method, array $args): QueryInterface
+    public function __call(string $method, array $args): SelectQuery
     {
         if (preg_match('/^find(?:\w+)?By/', $method) > 0) {
             return $this->_dynamicFinder($method, $args);
