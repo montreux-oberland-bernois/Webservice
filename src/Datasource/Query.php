@@ -486,13 +486,13 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     /**
      * Add AND conditions to the query
      *
-     * @param array $conditions The conditions to add with AND.
+     * @param array|string $conditions The conditions to add with AND.
      * @param array $types associative array of type names used to bind values to query
      * @return $this
      * @see \Cake\Database\Query::where()
      * @see \Cake\Database\Type
      */
-    public function andWhere($conditions, array $types = [])
+    public function andWhere(array|string $conditions, array $types = [])
     {
         $this->where($conditions, $types);
 

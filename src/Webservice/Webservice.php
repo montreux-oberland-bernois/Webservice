@@ -78,7 +78,7 @@ abstract class Webservice implements WebserviceInterface
      * @param \Muffin\Webservice\Webservice\Driver\AbstractDriver $driver Instance of the driver
      * @return $this
      */
-    public function setDriver(AbstractDriver $driver): self
+    public function setDriver(AbstractDriver $driver)
     {
         $this->_driver = $driver;
 
