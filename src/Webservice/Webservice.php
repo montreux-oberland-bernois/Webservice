@@ -292,16 +292,12 @@ abstract class Webservice implements WebserviceInterface
     /**
      * Creates a resource with the given class and properties
      *
-     * @param string $resourceClass The class to use to create the resource
+     * @param class-string<\Muffin\Webservice\Model\Resource> $resourceClass The class to use to create the resource
      * @param array $properties The properties to apply
      * @return \Muffin\Webservice\Model\Resource
-     * @psalm-suppress LessSpecificReturnStatement
-     * @psalm-suppress MoreSpecificReturnType
-     * @psalm-suppress InvalidStringClass
      */
     protected function _createResource(string $resourceClass, array $properties = []): Resource
     {
-        /* @phpstan-ignore-next-line See psalm suppress comments */
         return new $resourceClass($properties, [
             'markClean' => true,
             'markNew' => false,

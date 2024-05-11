@@ -283,10 +283,8 @@ class Marshaller
             })
             ->toArray();
 
-        /** @psalm-suppress NullArrayOffset, InvalidArrayOffset */
-        $new = $indexed[null] ?? [];
-        /** @psalm-suppress PossiblyNullArrayOffset, InvalidArrayOffset */
-        unset($indexed[null]);
+        $new = $indexed[''] ?? [];
+        unset($indexed['']);
         $output = [];
 
         foreach ($entities as $entity) {

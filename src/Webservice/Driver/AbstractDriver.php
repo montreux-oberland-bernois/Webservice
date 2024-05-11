@@ -134,7 +134,6 @@ abstract class AbstractDriver implements LoggerAwareInterface
      *
      * @param \Psr\Log\LoggerInterface $logger Logger object
      * @return void
-     * @psalm-suppress ImplementedReturnTypeMismatch
      */
     public function setLogger(LoggerInterface $logger): void
     {

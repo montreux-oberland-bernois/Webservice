@@ -415,7 +415,8 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * @param string $finder The finder method to use.
      * @param mixed ...$args Arguments that match up to finder-specific parameters
      * @return static Returns a modified query.
-     * @psalm-suppress MoreSpecificReturnType Couldn't get it to work with the interface and has no impact **/
+     * @psalm-suppress MoreSpecificReturnType Couldn't get it to work with the interface and has no impact
+     */
     public function find(string $finder, mixed ...$args): static
     {
         /** @psalm-suppress LessSpecificReturnStatement Couldn't get it to work with the interface and has no impact **/
@@ -434,7 +435,7 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
         if ($entity) {
             return $entity;
         }
-        /** @psalm-suppress UndefinedInterfaceMethod */
+
         throw new RecordNotFoundException(sprintf(
             'Record not found in endpoint "%s"',
             $this->_endpoint->getName()
@@ -479,7 +480,6 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * @return $this
      * @see \Cake\Database\Query::where()
      * @see \Cake\Database\Type
-     * @psalm-suppress PossiblyInvalidArgument
      */
     public function andWhere(string|array $conditions, array $types = [])
     {

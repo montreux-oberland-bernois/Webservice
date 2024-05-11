@@ -116,8 +116,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     /**
      * The name of the class that represent a single resource for this endpoint
      *
-     * @var string|null
-     * @psalm-var class-string<\Muffin\Webservice\Model\Resource>
+     * @var class-string<\Muffin\Webservice\Model\Resource>|null
      */
     protected ?string $_resourceClass = null;
 
@@ -493,8 +492,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     /**
      * Get the resource class name used to hydrate resources for this endpoint
      *
-     * @return string
-     * @psalm-return class-string<\Muffin\Webservice\Model\Resource>
+     * @return class-string<\Muffin\Webservice\Model\Resource>
      */
     public function getResourceClass(): string
     {
@@ -876,7 +874,6 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * @param \Closure|array|string $fields = array(); $fields A hash of field => new value.
      * @param \Closure|array|string|null $conditions Conditions to be used, accepts anything Query::where() can take.
      * @return int Count Returns the affected rows.
-     * @psalm-suppress MoreSpecificImplementedParamType
      * @throws \Exception
      */
     public function updateAll(Closure|array|string $fields, Closure|array|string|null $conditions): int
@@ -1184,8 +1181,6 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * {@inheritDoc}
      *
      * @return \Cake\Datasource\EntityInterface
-     * @psalm-suppress InvalidReturnStatement
-     * @psalm-suppress InvalidReturnType
      */
     public function newEmptyEntity(): EntityInterface
     {
@@ -1244,8 +1239,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * data merged in
      * @param array $data list of arrays to be merged into the entities
      * @param array $options A list of options for the objects hydration.
-     * @return array
-     * @psalm-return array<array-key, \Cake\Datasource\EntityInterface>
+     * @return array<\Cake\Datasource\EntityInterface>
      */
     public function patchEntities(iterable $entities, array $data, array $options = []): array
     {
