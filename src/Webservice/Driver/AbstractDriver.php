@@ -22,9 +22,9 @@ abstract class AbstractDriver implements LoggerAwareInterface
     /**
      * Client
      *
-     * @var object
+     * @var object|null
      */
-    protected object $_client;
+    protected ?object $_client = null;
 
     /**
      * Default config
