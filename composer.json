@@ -44,10 +44,7 @@
     "require-dev": {
         "cakephp/cakephp": "^5.0",
         "cakephp/cakephp-codesniffer": "^5.0",
-        "phpunit/phpunit": "^10.5.5",
-        "ext-mbstring": "*",
-        "vimeo/psalm": "5.23.1",
-        "phpstan/phpstan": "1.10.65"
+        "phpunit/phpunit": "^10.5.5"
     },
     "scripts": {
         "cs-check": "phpcs --colors --parallel=16 -p src/ tests/",

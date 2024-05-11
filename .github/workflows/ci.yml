@@ -84,10 +84,7 @@ jobs:
         php-version: '8.1'
         extensions: mbstring, intl
         coverage: none
-        tools: psalm:5.23.1, phpstan:1.10.65
-
-    - name: Composer Install
-      run: composer require cakephp/cakephp-codesniffer:^4.2
+        tools: psalm:5, phpstan:1.10
 
     - name: Run phpcs
       run: vendor/bin/phpcs --standard=CakePHP src/ tests/
