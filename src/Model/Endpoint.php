@@ -36,7 +36,6 @@ use function Cake\Core\namespaceSplit;
 /**
  * The table equivalent of a webservice endpoint
  *
- * @package Muffin\Webservice\Model
  * @template TSubject of object
  * @implements \Cake\Event\EventDispatcherInterface<TSubject>
  * @psalm-consistent-constructor
@@ -370,10 +369,10 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     /**
      * Returns the schema endpoint object describing this endpoint's properties.
      *
-     * @return \Muffin\Webservice\Datasource\Schema|null
+     * @return \Muffin\Webservice\Datasource\Schema
      * @throws \Exception
      */
-    public function getSchema(): ?Schema
+    public function getSchema(): Schema
     {
         if ($this->_schema === null) {
             $this->_schema = $this->getWebservice()->describe($this->getName());
@@ -383,10 +382,10 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     }
 
     /**
-     * Test to see if a Table has a specific field/column.
+     * Test to see if a Endpoint has a specific field/column.
      *
      * Delegates to the schema object and checks for column presence
-     * using the Schema\Table instance.
+     * using the Model\Schema instance.
      *
      * @param string $field The field to check for.
      * @return bool True if the field exists, false if it does not.
@@ -394,9 +393,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      */
     public function hasField(string $field): bool
     {
-        $schema = $this->getSchema();
-
-        return $schema?->getColumn($field) !== null;
+        return $this->getSchema()->getColumn($field) !== null;
     }
 
     /**
