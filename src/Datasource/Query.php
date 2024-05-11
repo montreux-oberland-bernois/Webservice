@@ -6,8 +6,6 @@ namespace Muffin\Webservice\Datasource;
 use ArrayObject;
 use Cake\Collection\Iterator\MapReduce;
 use Cake\Database\ExpressionInterface;
-use Cake\Database\TypeMap;
-use Cake\Database\TypeMapTrait;
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Datasource\QueryCacher;
 use Cake\Datasource\QueryInterface;
@@ -32,8 +30,6 @@ use UnexpectedValueException;
  */
 class Query implements IteratorAggregate, JsonSerializable, QueryInterface
 {
-    use TypeMapTrait;
-
     public const ACTION_CREATE = 1;
     public const ACTION_READ = 2;
     public const ACTION_UPDATE = 3;
@@ -66,13 +62,6 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * @var bool
      */
     protected bool $_beforeFindFired = false;
-
-    /**
-     * Whether the query is standalone or the product of an eager load operation.
-     *
-     * @var bool
-     */
-    protected bool $_eagerLoaded = false;
 
     /**
      * Indicates whether internal state of this query was changed, this is used to
@@ -227,25 +216,35 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     }
 
     /**
+     * Adds a single or multiple fields to be used in the ORDER clause for this query.
+     * Fields can be passed as an array of strings, array of expression
+     * objects, a single expression or a single string.
+     *
+     * If an array is passed, keys will be used as the field itself and the value will
+     * represent the order in which such field should be ordered. When called multiple
+     * times with the same fields as key, the last order definition will prevail over
+     * the others.
+     *
+     * By default this function will append any passed argument to the list of fields
+     * to be selected, unless the second argument is set to true.
+     *
      * @param \Closure|array|string $fields The field configuration for the order by clause
      * @param bool $overwrite Whether to overwrite the existing conditions
      * @return $this
      */
     public function orderBy(Closure|array|string $fields, bool $overwrite = false)
     {
-        $this->order($fields, $overwrite);
+        if ($fields instanceof Closure) {
+            $fields = $fields($this);
+        }
+
+        if (!is_array($fields)) {
+            $fields = [$fields];
+        }
+
+        $this->_parts['order'] = $overwrite ? $fields : Hash::merge($this->clause('order'), $fields);
 
         return $this;
-    }
-
-    /**
-     * Returns the existing type map.
-     *
-     * @return \Cake\Database\TypeMap
-     */
-    public function getTypeMap(): TypeMap
-    {
-        return $this->_typeMap ??= new TypeMap();
     }
 
     /**
@@ -443,11 +442,11 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     }
 
     /**
-     * Alias a field with the endpoint's current alias.
+     * Returns a key => value array where both the key and value are the `$field`.
      *
      * @param string $field The field to alias.
      * @param string|null $alias Not being used
-     * @return array<string, string> The field prefixed with the endpoint alias.
+     * @return array<string, string>
      */
     public function aliasField(string $field, ?string $alias = null): array
     {
@@ -467,7 +466,19 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
         array $types = [],
         bool $overwrite = false
     ) {
-        $this->_parts['where'] = !$overwrite ? Hash::merge($this->clause('where'), $conditions) : $conditions;
+        if ($conditions === null) {
+            $conditions = [];
+        }
+
+        if ($conditions instanceof Closure) {
+            $conditions = $conditions($this);
+        }
+
+        if (!is_array($conditions)) {
+            $conditions = [$conditions];
+        }
+
+        $this->_parts['where'] = $overwrite ? $conditions : Hash::merge($this->clause('where'), $conditions);
 
         return $this;
     }
@@ -475,13 +486,13 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     /**
      * Add AND conditions to the query
      *
-     * @param array|string $conditions The conditions to add with AND.
+     * @param array $conditions The conditions to add with AND.
      * @param array $types associative array of type names used to bind values to query
      * @return $this
      * @see \Cake\Database\Query::where()
      * @see \Cake\Database\Type
      */
-    public function andWhere(string|array $conditions, array $types = [])
+    public function andWhere($conditions, array $types = [])
     {
         $this->where($conditions, $types);
 
@@ -555,10 +566,10 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     /**
      * Set fields to save in resources
      *
-     * @param \Closure|array|string $fields The field to set
+     * @param array $fields The field to set
      * @return $this
      */
-    public function set(Closure|array|string $fields)
+    public function set(array $fields)
     {
         if (!in_array($this->clause('action'), [self::ACTION_CREATE, self::ACTION_UPDATE])) {
             throw new UnexpectedValueException('The action of this query needs to be either create update');
@@ -580,27 +591,14 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     }
 
     /**
-     * Adds a single or multiple fields to be used in the ORDER clause for this query.
-     * Fields can be passed as an array of strings, array of expression
-     * objects, a single expression or a single string.
-     *
-     * If an array is passed, keys will be used as the field itself and the value will
-     * represent the order in which such field should be ordered. When called multiple
-     * times with the same fields as key, the last order definition will prevail over
-     * the others.
-     *
-     * By default this function will append any passed argument to the list of fields
-     * to be selected, unless the second argument is set to true.
-     *
+     * @deprecated version 4.0.0 Use orderBy() instead.
      * @param \Cake\Database\ExpressionInterface|\Closure|array|string $fields fields to be added to the list
      * @param bool $overwrite whether to reset order with field list or not
      * @return $this
      */
     public function order(array|ExpressionInterface|Closure|string $fields, bool $overwrite = false)
     {
-        $this->_parts['order'] = !$overwrite ? Hash::merge($this->clause('order'), $fields) : $fields;
-
-        return $this;
+        return $this->orderBy($fields, $overwrite);
     }
 
     /**
@@ -623,7 +621,7 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
             unset($options['limit']);
         }
         if (isset($options['order'])) {
-            $this->order($options['order']);
+            $this->orderBy($options['order']);
 
             unset($options['order']);
         }
@@ -704,7 +702,6 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
             $endpoint->dispatchEvent('Model.beforeFind', [
                 $this,
                 new ArrayObject($this->_options),
-                !$this->isEagerLoaded(),
             ]);
         }
     }
@@ -902,30 +899,6 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     public function getOptions(): array
     {
         return $this->_options;
-    }
-
-    /**
-     * Returns the current configured query `_eagerLoaded` value
-     *
-     * @return bool
-     */
-    public function isEagerLoaded(): bool
-    {
-        return $this->_eagerLoaded;
-    }
-
-    /**
-     * Sets the query instance to be an eager loaded query. If no argument is
-     * passed, the current configured query `_eagerLoaded` value is returned.
-     *
-     * @param bool $value Whether to eager load.
-     * @return $this
-     */
-    public function eagerLoaded(bool $value)
-    {
-        $this->_eagerLoaded = $value;
-
-        return $this;
     }
 
     /**
