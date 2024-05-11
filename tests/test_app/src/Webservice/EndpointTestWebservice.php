@@ -66,9 +66,9 @@ class EndpointTestWebservice extends Webservice
 
     protected function _executeReadQuery(Query $query, array $options = []): bool|ResultSet
     {
-        $whereConditions = $query->clause('where');
-        if (!empty($whereConditions['id'])) {
-            $index = $this->conditionsToIndex($whereConditions);
+        $conditions = $query->clause('where');
+        if (!empty($conditions['id'])) {
+            $index = $this->conditionsToIndex($conditions);
 
             if (!isset($this->resources[$index])) {
                 return new ResultSet([], 0);
@@ -78,7 +78,7 @@ class EndpointTestWebservice extends Webservice
                 $this->resources[$index],
             ], 1);
         }
-        $conditions = $this->extractConditions($query->getOptions());
+
         if (isset($conditions[$query->getEndpoint()->aliasField('title')])) {
             $resources = [];
 
@@ -136,16 +136,5 @@ class EndpointTestWebservice extends Webservice
     public function conditionsToIndex(array $conditions): int
     {
         return $conditions['id'] - 1;
-    }
-
-    public function extractConditions(array $options)
-    {
-        foreach ($options as $option) {
-            if (isset($option['conditions'])) {
-                return $option['conditions'];
-            }
-        }
-
-        return null;
     }
 }

@@ -592,11 +592,11 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
 
     /**
      * @deprecated version 4.0.0 Use orderBy() instead.
-     * @param \Cake\Database\ExpressionInterface|\Closure|array|string $fields fields to be added to the list
+     * @param \Closure|array|string $fields fields to be added to the list
      * @param bool $overwrite whether to reset order with field list or not
      * @return $this
      */
-    public function order(array|ExpressionInterface|Closure|string $fields, bool $overwrite = false)
+    public function order(Closure|array|string $fields, bool $overwrite = false)
     {
         return $this->orderBy($fields, $overwrite);
     }
@@ -610,25 +610,25 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      */
     public function applyOptions(array $options)
     {
-        if (isset($options['page'])) {
-            $this->page($options['page']);
+        $valid = [
+            'select' => 'select',
+            'fields' => 'select',
+            'conditions' => 'where',
+            'where' => 'where',
+            'order' => 'orderBy',
+            'orderBy' => 'orderBy',
+            'limit' => 'limit',
+            'offset' => 'offset',
+            'page' => 'page',
+        ];
 
-            unset($options['page']);
-        }
-        if (isset($options['limit'])) {
-            $this->limit($options['limit']);
+        ksort($options);
+        foreach ($options as $option => $values) {
+            if (isset($valid[$option], $values)) {
+                $this->{$valid[$option]}($values);
 
-            unset($options['limit']);
-        }
-        if (isset($options['order'])) {
-            $this->orderBy($options['order']);
-
-            unset($options['order']);
-        }
-        if (isset($options['conditions'])) {
-            $this->where($options['conditions']);
-
-            unset($options['conditions']);
+                unset($options[$option]);
+            }
         }
 
         $this->_options = Hash::merge($this->_options, $options);

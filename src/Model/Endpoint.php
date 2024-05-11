@@ -421,9 +421,8 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     public function getPrimaryKey(): array|string|null
     {
         if ($this->_primaryKey === null) {
-            $schema = $this->getSchema();
-            $key = $schema?->getPrimaryKey();
-            if ($key !== null && count($key) === 1) {
+            $key = $this->getSchema()->getPrimaryKey();
+            if (count($key) === 1) {
                 $key = $key[0];
             }
             $this->_primaryKey = $key;
@@ -458,10 +457,10 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
             $this->_displayField = array_shift($primary);
 
             $schema = $this->getSchema();
-            if ($schema?->getColumn('title') !== null) {
+            if ($schema->getColumn('title') !== null) {
                 $this->_displayField = 'title';
             }
-            if ($schema?->getColumn('name') !== null) {
+            if ($schema->getColumn('name') !== null) {
                 $this->_displayField = 'name';
             }
         }
@@ -586,10 +585,10 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      *
      * @param string $type the type of query to perform
      * @param mixed ...$args Arguments that match up to finder-specific parameters
-     * @return \Cake\Datasource\QueryInterface
+     * @return \Muffin\Webservice\Datasource\Query
      * @throws \Exception
      */
-    public function find(string $type = 'all', mixed ...$args): QueryInterface
+    public function find(string $type = 'all', mixed ...$args): Query
     {
         $query = $this->query()->read();
 
@@ -634,19 +633,14 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * of calling `primaryKey` and `displayField` respectively in this endpoint:
      *
      * ```
-     * $endpoint->find('list', [
-     *  'keyField' => 'name',
-     *  'valueField' => 'age'
-     * ]);
+     * $endpoint->find('list', keyField: 'name', valueField: 'age');
      * ```
      *
      * Results can be put together in bigger groups when they share a property, you
      * can customize the property to use for grouping by setting `groupField`:
      *
      * ```
-     * $endpoint->find('list', [
-     *  'groupField' => 'category_id',
-     * ]);
+     * $endpoint->find('list', groupField: 'category_id');
      * ```
      *
      * When using a `groupField` results will be returned in this format:
@@ -784,7 +778,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
         $finder = $args['finder'] ?? 'all';
         unset($args['key'], $args['cache'], $args['finder']);
 
-        $query = $this->find($finder, $args)->where($conditions);
+        $query = $this->find($finder, ...$args)->where($conditions);
 
         if (($cacheConfig !== false && $cacheConfig !== null) && is_callable($cache)) {
             if ($cacheKey !== null) {
@@ -874,6 +868,12 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      */
     public function updateAll(Closure|array|string $fields, Closure|array|string|null $conditions): int
     {
+        if ($fields instanceof Closure) {
+            $fields = $fields($this);
+        }
+
+        $fields = (array)$fields;
+
         $res = $this->query()->update()->where($conditions)->set($fields)->execute();
 
         if ($res instanceof ResultSetInterface) {
@@ -979,7 +979,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
             return $event->getResult();
         }
 
-        $data = $entity->extract($this->getSchema()?->columns() ?? [], true);
+        $data = $entity->extract($this->getSchema()->columns(), true);
 
         if ($entity->isNew()) {
             $query = $this->query()->create();
@@ -1060,7 +1060,6 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
 
     /**
      * @internal
-     * @template TSubject of \Cake\Datasource\EntityInterface|array
      * @param \Closure $callable Callable.
      * @param \Muffin\Webservice\Datasource\Query $query The query object.
      * @param array $args Arguments for the callable.
@@ -1075,6 +1074,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
         $secondParamType = $secondParam?->getType();
         $secondParamTypeName = $secondParamType instanceof ReflectionNamedType ? $secondParamType->getName() : null;
 
+        /** @psalm-suppress PossiblyNullReference */
         $secondParamIsOptions = (
             count($params) === 2 &&
             $secondParam?->name === 'options' &&
@@ -1130,6 +1130,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
             $lastParam = end($params);
             reset($params);
 
+            /** @psalm-suppress DocblockTypeContradiction */
             if ($lastParam === false || !$lastParam->isVariadic()) {
                 $paramNames = [];
                 foreach ($params as $param) {
@@ -1152,14 +1153,14 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      *
      * @param string $method The method name that was fired.
      * @param array $args List of arguments passed to the function.
-     * @return \Cake\Datasource\QueryInterface
+     * @return \Muffin\Webservice\Datasource\Query
      * @throws \BadMethodCallException when there are missing arguments, or when and & or are combined.
      */
-    protected function _dynamicFinder(string $method, array $args): QueryInterface
+    protected function _dynamicFinder(string $method, array $args): Query
     {
         $method = Inflector::underscore($method);
         preg_match('/^find_([\w]+)_by_/', $method, $matches);
-        if (empty($matches)) {
+        if (!$matches) {
             // find_by_ is 8 characters.
             $fields = substr($method, 8);
             $findType = 'all';
@@ -1167,8 +1168,8 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
             $fields = substr($method, strlen($matches[0]));
             $findType = Inflector::variable($matches[1]);
         }
-        $hasOr = strpos($fields, '_or_');
-        $hasAnd = strpos($fields, '_and_');
+        $hasOr = str_contains($fields, '_or_');
+        $hasAnd = str_contains($fields, '_and_');
 
         $makeConditions = function ($fields, $args) {
             $conditions = [];
@@ -1192,7 +1193,6 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
             );
         }
 
-        $conditions = [];
         if ($hasOr === false && $hasAnd === false) {
             $conditions = $makeConditions([$fields], $args);
         } elseif ($hasOr !== false) {
@@ -1205,9 +1205,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
             $conditions = $makeConditions($fields, $args);
         }
 
-        return $this->find($findType, [
-            'conditions' => $conditions,
-        ]);
+        return $this->find($findType, conditions: $conditions);
     }
 
     /**
