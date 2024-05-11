@@ -5,6 +5,7 @@ namespace TestApp\Webservice;
 
 use Muffin\Webservice\Model\Endpoint;
 use Muffin\Webservice\Model\Resource;
+use Muffin\Webservice\Webservice\Driver\AbstractDriver;
 use Muffin\Webservice\Webservice\Webservice;
 
 class TestWebservice extends Webservice
@@ -20,5 +21,12 @@ class TestWebservice extends Webservice
     public function transformResults(Endpoint $endpoint, array $results): array
     {
         return $this->_transformResults($endpoint, $results);
+    }
+
+    public function setDriver(AbstractDriver $driver): self
+    {
+        $this->_driver = $driver;
+
+        return $this;
     }
 }

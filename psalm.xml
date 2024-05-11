@@ -16,7 +16,6 @@
     </projectFiles>
 
     <issueHandlers>
-        <RedundantConditionGivenDocblockType errorLevel="suppress"/>
         <MissingClosureParamType errorLevel="suppress"/>
         <MissingClosureReturnType errorLevel="suppress"/>
         <PropertyNotSetInConstructor errorLevel="suppress"/>

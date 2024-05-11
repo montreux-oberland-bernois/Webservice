@@ -72,9 +72,9 @@ abstract class AbstractDriver implements LoggerAwareInterface
      * Set the client instance this driver will use to make requests
      *
      * @param object $client Client instance
-     * @return self
+     * @return $this
      */
-    public function setClient(object $client): AbstractDriver
+    public function setClient(object $client)
     {
         $this->_client = $client;
 
@@ -96,9 +96,9 @@ abstract class AbstractDriver implements LoggerAwareInterface
      *
      * @param string $name The registry alias for the webservice instance
      * @param \Muffin\Webservice\Webservice\WebserviceInterface $webservice Instance of the webservice
-     * @return self
+     * @return $this
      */
-    public function setWebservice(string $name, WebserviceInterface $webservice): AbstractDriver
+    public function setWebservice(string $name, WebserviceInterface $webservice)
     {
         $this->_webservices[$name] = $webservice;
 
@@ -164,9 +164,9 @@ abstract class AbstractDriver implements LoggerAwareInterface
     /**
      * Enable query logging for the driver
      *
-     * @return self
+     * @return $this
      */
-    public function enableQueryLogging(): AbstractDriver
+    public function enableQueryLogging()
     {
         $this->_logQueries = true;
 
@@ -176,9 +176,9 @@ abstract class AbstractDriver implements LoggerAwareInterface
     /**
      * Disable query logging for the driver
      *
-     * @return self
+     * @return $this
      */
-    public function disableQueryLogging(): AbstractDriver
+    public function disableQueryLogging()
     {
         $this->_logQueries = false;
 

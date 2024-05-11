@@ -76,9 +76,9 @@ abstract class Webservice implements WebserviceInterface
      * Set the webservice driver and return the instance for chaining
      *
      * @param \Muffin\Webservice\Webservice\Driver\AbstractDriver $driver Instance of the driver
-     * @return self
+     * @return $this
      */
-    public function setDriver(AbstractDriver $driver): Webservice
+    public function setDriver(AbstractDriver $driver): self
     {
         $this->_driver = $driver;
 
@@ -103,9 +103,9 @@ abstract class Webservice implements WebserviceInterface
      * Set the endpoint path this webservice uses
      *
      * @param string $endpoint Endpoint path
-     * @return self
+     * @return $this
      */
-    public function setEndpoint(string $endpoint): Webservice
+    public function setEndpoint(string $endpoint)
     {
         $this->_endpoint = $endpoint;
 

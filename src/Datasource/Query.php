@@ -229,10 +229,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     /**
      * @param \Closure|array|string $fields The field configuration for the order by clause
      * @param bool $overwrite Whether to overwrite the existing conditions
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function orderBy(Closure|array|string $fields, bool $overwrite = false): Query
+    public function orderBy(Closure|array|string $fields, bool $overwrite = false)
     {
         $this->order($fields, $overwrite);
 
@@ -263,10 +262,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * Set the default repository object that will be used by this query.
      *
      * @param \Cake\Datasource\RepositoryInterface $repository The default repository object to use.
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function setRepository(RepositoryInterface $repository): Query
+    public function setRepository(RepositoryInterface $repository)
     {
         assert(
             $repository instanceof Endpoint,
@@ -291,9 +289,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     /**
      * Mark the query as create
      *
-     * @return self
+     * @return $this
      */
-    public function create(): Query
+    public function create()
     {
         $this->action(self::ACTION_CREATE);
 
@@ -303,9 +301,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     /**
      * Mark the query as read
      *
-     * @return self
+     * @return $this
      */
-    public function read(): Query
+    public function read()
     {
         $this->action(self::ACTION_READ);
 
@@ -315,9 +313,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     /**
      * Mark the query as update
      *
-     * @return self
+     * @return $this
      */
-    public function update(): Query
+    public function update()
     {
         $this->action(self::ACTION_UPDATE);
 
@@ -327,9 +325,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     /**
      * Mark the query as delete
      *
-     * @return self
+     * @return $this
      */
-    public function delete(): Query
+    public function delete()
     {
         $this->action(self::ACTION_DELETE);
 
@@ -360,9 +358,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * Set the endpoint to be used
      *
      * @param \Muffin\Webservice\Model\Endpoint $endpoint The endpoint to use
-     * @return self
+     * @return $this
      */
-    public function setEndpoint(Endpoint $endpoint): Query
+    public function setEndpoint(Endpoint $endpoint)
     {
         $this->_endpoint = $endpoint;
 
@@ -383,9 +381,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * Set the webservice to be used
      *
      * @param \Muffin\Webservice\Webservice\WebserviceInterface $webservice The webservice to use
-     * @return self
+     * @return $this
      */
-    public function setWebservice(WebserviceInterface $webservice): Query
+    public function setWebservice(WebserviceInterface $webservice)
     {
         $this->_webservice = $webservice;
 
@@ -461,14 +459,13 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * @param \Closure|array|string|null $conditions The list of conditions.
      * @param array $types Not used, required to comply with QueryInterface.
      * @param bool $overwrite Whether to replace previous queries.
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
     public function where(
         Closure|array|string|null $conditions = null,
         array $types = [],
         bool $overwrite = false
-    ): Query {
+    ) {
         $this->_parts['where'] = !$overwrite ? Hash::merge($this->clause('where'), $conditions) : $conditions;
 
         return $this;
@@ -479,12 +476,12 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      *
      * @param array|string $conditions The conditions to add with AND.
      * @param array $types associative array of type names used to bind values to query
-     * @return self
+     * @return $this
      * @see \Cake\Database\Query::where()
      * @see \Cake\Database\Type
      * @psalm-suppress PossiblyInvalidArgument
      */
-    public function andWhere(string|array $conditions, array $types = []): Query
+    public function andWhere(string|array $conditions, array $types = [])
     {
         $this->where($conditions, $types);
 
@@ -495,9 +492,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * Charge this query's action
      *
      * @param int $action Action to use
-     * @return self
+     * @return $this
      */
-    public function action(int $action): Query
+    public function action(int $action)
     {
         $this->_parts['action'] = $action;
 
@@ -516,10 +513,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * @param int $num The page number you want.
      * @param int|null $limit The number of rows you want in the page. If null
      *  the current limit clause will be used.
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function page(int $num, ?int $limit = null): Query
+    public function page(int $num, ?int $limit = null)
     {
         if ($num < 1) {
             throw new InvalidArgumentException('Pages must start at 1.');
@@ -547,10 +543,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * ```
      *
      * @param ?int $limit number of records to be returned
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function limit(?int $limit): Query
+    public function limit(?int $limit)
     {
         $this->_parts['limit'] = $limit;
 
@@ -561,9 +556,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * Set fields to save in resources
      *
      * @param \Closure|array|string $fields The field to set
-     * @return self
+     * @return $this
      */
-    public function set(Closure|array|string $fields): Query
+    public function set(Closure|array|string $fields)
     {
         if (!in_array($this->clause('action'), [self::ACTION_CREATE, self::ACTION_UPDATE])) {
             throw new UnexpectedValueException('The action of this query needs to be either create update');
@@ -577,7 +572,7 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
     /**
      * @inheritDoc
      */
-    public function offset(?int $offset): QueryInterface
+    public function offset(?int $offset)
     {
         $this->_parts['offset'] = $offset;
 
@@ -599,10 +594,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      *
      * @param \Cake\Database\ExpressionInterface|\Closure|array|string $fields fields to be added to the list
      * @param bool $overwrite whether to reset order with field list or not
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function order(array|ExpressionInterface|Closure|string $fields, bool $overwrite = false): Query
+    public function order(array|ExpressionInterface|Closure|string $fields, bool $overwrite = false)
     {
         $this->_parts['order'] = !$overwrite ? Hash::merge($this->clause('order'), $fields) : $fields;
 
@@ -616,7 +610,7 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * @param array $options the options to be applied
      * @return $this This object
      */
-    public function applyOptions(array $options): Query
+    public function applyOptions(array $options)
     {
         if (isset($options['page'])) {
             $this->page($options['page']);
@@ -792,10 +786,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      *
      * @param \Cake\Database\ExpressionInterface|\Closure|array|string|float|int $fields The list of fields to select from _source.
      * @param bool $overwrite Whether or not to replace previous selections.
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function select(ExpressionInterface|Closure|array|string|int|float $fields, bool $overwrite = false): Query
+    public function select(ExpressionInterface|Closure|array|string|int|float $fields, bool $overwrite = false)
     {
         if (!is_string($fields) && is_callable($fields)) {
             $fields = $fields($this);
@@ -870,10 +863,10 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * @param \Closure|null $mapper The mapper function
      * @param \Closure|null $reducer The reducing function
      * @param bool $overwrite Set to true to overwrite existing map + reduce functions.
-     * @return self
+     * @return $this
      * @see \Cake\Collection\Iterator\MapReduce for details on how to use emit data to the map reducer.
      */
-    public function mapReduce(?Closure $mapper = null, ?Closure $reducer = null, bool $overwrite = false): Query
+    public function mapReduce(?Closure $mapper = null, ?Closure $reducer = null, bool $overwrite = false)
     {
         if ($overwrite) {
             $this->_mapReduce = [];
@@ -926,9 +919,9 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      * passed, the current configured query `_eagerLoaded` value is returned.
      *
      * @param bool $value Whether to eager load.
-     * @return self
+     * @return $this
      */
-    public function eagerLoaded(bool $value): Query
+    public function eagerLoaded(bool $value)
     {
         $this->_eagerLoaded = $value;
 
@@ -975,10 +968,10 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      *
      * @param \Closure|null $formatter The formatting function
      * @param int|bool $mode Whether to overwrite, append or prepend the formatter.
-     * @return self
+     * @return $this
      * @throws \InvalidArgumentException
      */
-    public function formatResults(?Closure $formatter = null, int|bool $mode = self::APPEND): Query
+    public function formatResults(?Closure $formatter = null, int|bool $mode = self::APPEND)
     {
         if ($mode === self::OVERWRITE) {
             $this->_formatters = [];

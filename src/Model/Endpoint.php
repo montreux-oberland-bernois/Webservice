@@ -243,9 +243,9 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * Set the name of this endpoint
      *
      * @param string $name The name for this endpoint instance
-     * @return self
+     * @return $this
      */
-    public function setName(string $name): Endpoint
+    public function setName(string $name)
     {
         $inflectMethod = $this->getInflectionMethod();
         $this->_name = Inflector::{$inflectMethod}($name);
@@ -293,10 +293,9 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * Sets the table registry key used to create this table instance.
      *
      * @param string $registryAlias The key used to access this object.
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function setRegistryAlias(string $registryAlias): Endpoint
+    public function setRegistryAlias(string $registryAlias)
     {
         $this->_registryAlias = $registryAlias;
 
@@ -321,9 +320,9 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * Sets the connection driver.
      *
      * @param \Muffin\Webservice\Datasource\Connection $connection Connection instance
-     * @return self
+     * @return $this
      */
-    public function setConnection(Connection $connection): Endpoint
+    public function setConnection(Connection $connection)
     {
         $this->_connection = $connection;
 
@@ -355,10 +354,10 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * out of it and used as the schema for this endpoint.
      *
      * @param \Muffin\Webservice\Datasource\Schema|array $schema Either an array of fields and config, or a schema object
-     * @return self
+     * @return $this
      * @throws \Exception
      */
-    public function setSchema(Schema|array $schema): Endpoint
+    public function setSchema(Schema|array $schema)
     {
         if (is_array($schema)) {
             $schema = new Schema($this->getName(), $schema);
@@ -405,9 +404,9 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * Returns the current endpoint
      *
      * @param list<string>|string|null $key sets a new name to be used as primary key
-     * @return self
+     * @return $this
      */
-    public function setPrimaryKey(string|array|null $key): Endpoint
+    public function setPrimaryKey(string|array|null $key)
     {
         $this->_primaryKey = $key;
 
@@ -438,9 +437,9 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * Sets the endpoint display field
      *
      * @param array<string>|string $field The new field to use as the display field
-     * @return self
+     * @return $this
      */
-    public function setDisplayField(string|array $field): Endpoint
+    public function setDisplayField(string|array $field)
     {
         $this->_displayField = $field;
 
@@ -475,10 +474,10 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * Set the resource class name used to hydrate resources for this endpoint
      *
      * @param string $name Name of the class to use
-     * @return self
+     * @return $this
      * @throws \Muffin\Webservice\Model\Exception\MissingResourceClassException If the resource class specified does not exist
      */
-    public function setResourceClass(string $name): Endpoint
+    public function setResourceClass(string $name)
     {
         /** @psalm-var class-string<\Muffin\Webservice\Model\Resource>|null $className */
         $className = App::className($name, 'Model/Resource');
@@ -526,9 +525,9 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * Set a new inflection method
      *
      * @param string $method The name of the inflection method
-     * @return self
+     * @return $this
      */
-    public function setInflectionMethod(string $method): Endpoint
+    public function setInflectionMethod(string $method)
     {
         $this->_inflectionMethod = $method;
 
@@ -550,10 +549,10 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      *
      * @param string $alias Alias for the webservice
      * @param \Muffin\Webservice\Webservice\WebserviceInterface $webservice The webservice instance
-     * @return self
+     * @return $this
      * @throws \Muffin\Webservice\Webservice\Exception\UnexpectedDriverException When no driver exists for the endpoint
      */
-    public function setWebservice(string $alias, WebserviceInterface $webservice): Endpoint
+    public function setWebservice(string $alias, WebserviceInterface $webservice)
     {
         $connection = $this->getConnection();
         $connection->setWebservice($alias, $webservice);
@@ -1344,10 +1343,9 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * Set the endpoint alias
      *
      * @param string $alias Alias for this endpoint
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function setAlias(string $alias): Endpoint
+    public function setAlias(string $alias)
     {
         $this->_alias = $alias;
 

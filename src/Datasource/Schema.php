@@ -157,10 +157,9 @@ class Schema implements SchemaInterface
      *
      * @param string $name The name of the column
      * @param array|string $attrs The attributes for the column.
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function addColumn(string $name, array|string $attrs): Schema
+    public function addColumn(string $name, array|string $attrs)
     {
         if (is_string($attrs)) {
             $attrs = ['type' => $attrs];
@@ -220,10 +219,9 @@ class Schema implements SchemaInterface
      * If the column is not defined in the table, no error will be raised.
      *
      * @param string $name The name of the column
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function removeColumn(string $name): Schema
+    public function removeColumn(string $name)
     {
         unset($this->_columns[$name], $this->_typeMap[$name]);
 
@@ -235,10 +233,9 @@ class Schema implements SchemaInterface
      *
      * @param string $name Column name
      * @param string $type Type to set for the column
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function setColumnType(string $name, string $type): Schema
+    public function setColumnType(string $name, string $type)
     {
         $this->_columns[$name]['type'] = $type;
         $this->_typeMap[$name] = $type;
@@ -361,10 +358,9 @@ class Schema implements SchemaInterface
      * Set the schema options for an endpoint
      *
      * @param array<string, mixed> $options Array of options to set
-     * @return self
-     * @psalm-suppress LessSpecificImplementedReturnType
+     * @return $this
      */
-    public function setOptions(array $options): Schema
+    public function setOptions(array $options)
     {
         $this->_options = array_merge($this->_options, $options);
 
