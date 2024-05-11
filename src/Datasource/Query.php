@@ -5,8 +5,6 @@ namespace Muffin\Webservice\Datasource;
 
 use ArrayObject;
 use Cake\Collection\Iterator\MapReduce;
-use Cake\Database\Expression\OrderByExpression;
-use Cake\Database\Expression\QueryExpression;
 use Cake\Database\ExpressionInterface;
 use Cake\Database\TypeMap;
 use Cake\Database\TypeMapTrait;
@@ -216,8 +214,7 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
             $res = $this->_execute();
 
             if (!is_iterable($res)) {
-                $this->_results = new ResultSet([], 0);
-                return $this->_results;
+                return $this->_results = new ResultSet([], 0);
             }
 
             $results = $this->decorateResults($res);
