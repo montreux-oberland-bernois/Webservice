@@ -8,28 +8,28 @@ use Cake\Core\PluginApplicationInterface;
 use Cake\Datasource\FactoryLocator;
 use Muffin\Webservice\Model\EndpointLocator;
 
-class Plugin extends BasePlugin
+class WebservicePlugin extends BasePlugin
 {
     /**
      * Disable routes hook.
      *
      * @var bool
      */
-    protected $routesEnabled = false;
+    protected bool $routesEnabled = false;
 
     /**
      * Disable middleware hook.
      *
      * @var bool
      */
-    protected $middlewareEnabled = false;
+    protected bool $middlewareEnabled = false;
 
     /**
      * Disable console hook.
      *
      * @var bool
      */
-    protected $consoleEnabled = false;
+    protected bool $consoleEnabled = false;
 
     /**
      * @inheritDoc

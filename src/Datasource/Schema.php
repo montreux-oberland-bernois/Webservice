@@ -20,49 +20,49 @@ class Schema implements SchemaInterface
      *
      * @var string
      */
-    protected $_repository;
+    protected string $_repository;
 
     /**
      * Columns in the endpoint.
      *
      * @var array
      */
-    protected $_columns = [];
+    protected array $_columns = [];
 
     /**
      * A map with columns to types
      *
-     * @var array
+     * @var array<string, string>
      */
-    protected $_typeMap = [];
+    protected array $_typeMap = [];
 
     /**
      * Indexes in the endpoint.
      *
      * @var array
      */
-    protected $_indexes = [];
+    protected array $_indexes = [];
 
     /**
      * Constraints in the endpoint.
      *
      * @var array
      */
-    protected $_constraints = [];
+    protected array $_constraints = [];
 
     /**
      * Options for the endpoint.
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $_options = [];
+    protected array $_options = [];
 
     /**
      * Whether or not the endpoint is temporary
      *
      * @var bool
      */
-    protected $_temporary = false;
+    protected bool $_temporary = false;
 
     /**
      * The valid keys that can be used in a column
@@ -70,7 +70,7 @@ class Schema implements SchemaInterface
      *
      * @var array
      */
-    protected static $_columnKeys = [
+    protected static array $_columnKeys = [
         'type' => null,
         'baseType' => null,
         'length' => null,
@@ -86,7 +86,7 @@ class Schema implements SchemaInterface
      *
      * @var array
      */
-    protected static $_columnExtras = [
+    protected static array $_columnExtras = [
         'string' => [
             'fixed' => null,
         ],
@@ -157,9 +157,10 @@ class Schema implements SchemaInterface
      *
      * @param string $name The name of the column
      * @param array|string $attrs The attributes for the column.
-     * @return $this
+     * @return self
+     * @psalm-suppress LessSpecificImplementedReturnType
      */
-    public function addColumn(string $name, $attrs)
+    public function addColumn(string $name, array|string $attrs): Schema
     {
         if (is_string($attrs)) {
             $attrs = ['type' => $attrs];
@@ -178,7 +179,7 @@ class Schema implements SchemaInterface
     /**
      * Get the column names in the endpoint.
      *
-     * @return string[]
+     * @return list<string>
      */
     public function columns(): array
     {
@@ -219,9 +220,10 @@ class Schema implements SchemaInterface
      * If the column is not defined in the table, no error will be raised.
      *
      * @param string $name The name of the column
-     * @return $this
+     * @return self
+     * @psalm-suppress LessSpecificImplementedReturnType
      */
-    public function removeColumn(string $name)
+    public function removeColumn(string $name): Schema
     {
         unset($this->_columns[$name], $this->_typeMap[$name]);
 
@@ -233,9 +235,10 @@ class Schema implements SchemaInterface
      *
      * @param string $name Column name
      * @param string $type Type to set for the column
-     * @return $this
+     * @return self
+     * @psalm-suppress LessSpecificImplementedReturnType
      */
-    public function setColumnType(string $name, string $type)
+    public function setColumnType(string $name, string $type): Schema
     {
         $this->_columns[$name]['type'] = $type;
         $this->_typeMap[$name] = $type;
@@ -247,7 +250,7 @@ class Schema implements SchemaInterface
      * Get the type of a column
      *
      * @param string $name Column name
-     * @return null|string
+     * @return string|null
      */
     public function getColumnType(string $name): ?string
     {
@@ -278,7 +281,7 @@ class Schema implements SchemaInterface
             return null;
         }
 
-        if (TypeFactory::getMap($type)) {
+        if (TypeFactory::getMap($type) !== null) {
             $type = TypeFactory::build($type)->getBaseType();
         }
 
@@ -337,7 +340,7 @@ class Schema implements SchemaInterface
     /**
      * Get the column(s) used for the primary key.
      *
-     * @return array Column name(s) for the primary key. An
+     * @return list<string> Column name(s) for the primary key. An
      *   empty list will be returned when the endpoint has no primary key.
      */
     public function getPrimaryKey(): array
@@ -358,9 +361,10 @@ class Schema implements SchemaInterface
      * Set the schema options for an endpoint
      *
      * @param array<string, mixed> $options Array of options to set
-     * @return $this
+     * @return self
+     * @psalm-suppress LessSpecificImplementedReturnType
      */
-    public function setOptions(array $options)
+    public function setOptions(array $options): Schema
     {
         $this->_options = array_merge($this->_options, $options);
 

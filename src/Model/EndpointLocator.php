@@ -10,6 +10,7 @@ use Cake\Datasource\Locator\AbstractLocator;
 use Cake\Datasource\RepositoryInterface;
 use Cake\Utility\Inflector;
 use Muffin\Webservice\Datasource\Connection;
+use function Cake\Core\pluginSplit;
 
 /**
  * Class EndpointLocator
@@ -22,8 +23,8 @@ class EndpointLocator extends AbstractLocator
      * @param string $alias The alias to set.
      * @param \Muffin\Webservice\Model\Endpoint $repository The repository to set.
      * @return \Muffin\Webservice\Model\Endpoint
-     * @psalm-suppress MoreSpecificImplementedParamType
      * @psalm-suppress MoreSpecificReturnType
+     * @psalm-suppress MoreSpecificImplementedParamType Not a nice solution, but in this plugin, we only support Endpoints
      */
     public function set(string $alias, RepositoryInterface $repository): Endpoint
     {
@@ -40,8 +41,14 @@ class EndpointLocator extends AbstractLocator
      */
     public function get(string $alias, array $options = []): Endpoint
     {
-        /** @var \Muffin\Webservice\Model\Endpoint */
-        return parent::get($alias, $options);
+        $parentRes = parent::get($alias, $options);
+
+        assert(
+            $parentRes instanceof Endpoint,
+            'The repository found is not of type Endpoint, but a different type implementing RepositoryInterface'
+        );
+
+        return $parentRes;
     }
 
     /**
@@ -51,7 +58,7 @@ class EndpointLocator extends AbstractLocator
      * @param array $options The alias to check for.
      * @return \Muffin\Webservice\Model\Endpoint
      */
-    protected function createInstance(string $alias, array $options)
+    protected function createInstance(string $alias, array $options): Endpoint
     {
         [, $classAlias] = pluginSplit($alias);
         $options = ['alias' => $classAlias] + $options;
@@ -63,7 +70,7 @@ class EndpointLocator extends AbstractLocator
         if ($className) {
             $options['className'] = $className;
         } else {
-            if (!isset($options['endpoint']) && strpos($options['className'], '\\') === false) {
+            if (!isset($options['endpoint']) && !str_contains($options['className'], '\\')) {
                 [, $endpoint] = pluginSplit($options['className']);
                 $options['endpoint'] = Inflector::underscore($endpoint);
             }
@@ -74,11 +81,11 @@ class EndpointLocator extends AbstractLocator
             if ($options['className'] !== Endpoint::class) {
                 $connectionName = $options['className']::defaultConnectionName();
             } else {
-                if (strpos($alias, '.') === false) {
+                if (!str_contains($alias, '.')) {
                     $connectionName = 'webservice';
                 } else {
-                    /** @psalm-suppress PossiblyNullArgument */
-                    $pluginParts = explode('/', pluginSplit($alias)[0]);
+                    /** @psalm-suppress PossiblyNullArgument Not clean, but cannot happen with incorrect configuration and was not a problem before **/
+                    $pluginParts = explode('/', pluginSplit($alias)[0]); /* @phpstan-ignore-line */
                     $connectionName = Inflector::underscore(end($pluginParts));
                 }
             }
@@ -111,7 +118,6 @@ class EndpointLocator extends AbstractLocator
             $message = $e->getMessage()
                 . ' You can override Endpoint::defaultConnectionName() to return the connection name you want.';
 
-            /** @psalm-suppress PossiblyInvalidArgument */
             throw new MissingDatasourceConfigException($message, $e->getCode(), $e->getPrevious());
         }
     }

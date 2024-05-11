@@ -1,11 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace Muffin\Webservice\Test\TestCase\Model;
+namespace Muffin\Webservice\Test\TestCase;
 
 use Cake\Http\Client;
 use Cake\TestSuite\TestCase;
 use SomeVendor\SomePlugin\Webservice\Driver\SomePlugin;
+use StdClass;
 use TestApp\Webservice\Driver\Test;
 use TestApp\Webservice\Logger;
 use TestApp\Webservice\TestWebservice;
@@ -37,7 +38,7 @@ class AbstractDriverTest extends TestCase
 
     public function testSetClient()
     {
-        $client = new \StdClass();
+        $client = new StdClass();
 
         $driver = new Test();
         $driver->setClient($client);

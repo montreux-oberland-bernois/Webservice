@@ -7,6 +7,9 @@ use Cake\Datasource\EntityInterface;
 use Cake\Datasource\EntityTrait;
 use Cake\Datasource\InvalidPropertyInterface;
 
+/**
+ * @psalm-consistent-constructor
+ */
 class Resource implements EntityInterface, InvalidPropertyInterface
 {
     use EntityTrait;
