@@ -5,7 +5,7 @@ namespace Muffin\Webservice\Test\TestCase\Webservice;
 
 use Cake\TestSuite\TestCase;
 use Muffin\Webservice\Datasource\Query;
-use Muffin\Webservice\Datasource\Query\SelectQuery;
+use Muffin\Webservice\Datasource\Query\ReadQuery;
 use Muffin\Webservice\Model\Endpoint;
 use Muffin\Webservice\Model\Exception\MissingEndpointSchemaException;
 use Muffin\Webservice\Webservice\Exception\UnimplementedWebserviceMethodException;
@@ -128,7 +128,7 @@ class WebserviceTest extends TestCase
         $this->expectException(UnimplementedWebserviceMethodException::class);
         $this->expectExceptionMessage('Webservice TestApp\Webservice\TestWebservice does not implement _executeReadQuery');
 
-        $query = new SelectQuery($this->webservice, new Endpoint());
+        $query = new ReadQuery($this->webservice, new Endpoint());
 
         $this->webservice->execute($query);
     }

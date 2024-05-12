@@ -27,7 +27,7 @@ use Traversable;
  * @template-covariant TValue
  * @template-implements \IteratorAggregate<TKey, TValue>
  */
-class SelectQuery extends Query implements IteratorAggregate, JsonSerializable, QueryInterface
+class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, QueryInterface
 {
     /**
      * Indicates that the operation should append to the list

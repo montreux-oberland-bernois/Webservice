@@ -5,15 +5,15 @@ namespace Muffin\Webservice\Test\TestCase\Datasource\Query;
 
 use Cake\Database\Expression\ComparisonExpression;
 use Cake\TestSuite\TestCase;
-use Muffin\Webservice\Datasource\Query\SelectQuery;
+use Muffin\Webservice\Datasource\Query\ReadQuery;
 use Muffin\Webservice\Datasource\ResultSet;
 use Muffin\Webservice\Model\Endpoint;
 use Muffin\Webservice\Model\Resource;
 use TestApp\Webservice\StaticWebservice;
 
-class SelectQueryTest extends TestCase
+class ReadQueryTest extends TestCase
 {
-    public SelectQuery $query;
+    protected ReadQuery $query;
 
     /**
      * @inheritDoc
@@ -22,7 +22,7 @@ class SelectQueryTest extends TestCase
     {
         parent::setUp();
 
-        $this->query = new SelectQuery(new StaticWebservice(), new Endpoint());
+        $this->query = new ReadQuery(new StaticWebservice(), new Endpoint());
     }
 
     public function testAliasField()
