@@ -7,7 +7,6 @@ use Cake\Collection\CollectionTrait;
 use Cake\Datasource\ResultSetInterface;
 use Muffin\Webservice\Model\Resource;
 
-/** @package Muffin\Webservice\Datasource */
 /**
  * @template T of \Cake\Datasource\EntityInterface|array
  * @implements \Cake\Datasource\ResultSetInterface<T>

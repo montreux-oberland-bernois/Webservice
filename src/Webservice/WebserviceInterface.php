@@ -10,8 +10,6 @@ use Muffin\Webservice\Model\Resource;
 
 /**
  * Describes a webservice used to call a API
- *
- * @package Muffin\Webservice\Webservice
  */
 interface WebserviceInterface
 {

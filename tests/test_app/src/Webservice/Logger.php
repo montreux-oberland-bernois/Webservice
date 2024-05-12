@@ -6,11 +6,6 @@ namespace TestApp\Webservice;
 use Psr\Log\LoggerInterface;
 use Stringable;
 
-/**
- * @package MuffinWebservice
- * @author David Yell <dyell@ukwebmedia.com>
- * @copyright UK Web Media Ltd
- */
 class Logger implements LoggerInterface
 {
     /**

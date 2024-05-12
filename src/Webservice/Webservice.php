@@ -20,8 +20,6 @@ use function Cake\Core\pluginSplit;
 
 /**
  * Basic implementation of a webservice
- *
- * @package Muffin\Webservice\Webservice
  */
 abstract class Webservice implements WebserviceInterface
 {

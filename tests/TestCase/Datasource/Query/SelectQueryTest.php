@@ -5,7 +5,6 @@ namespace Muffin\Webservice\Test\TestCase\Datasource\Query;
 
 use Cake\Database\Expression\ComparisonExpression;
 use Cake\TestSuite\TestCase;
-use Muffin\Webservice\Datasource\Query;
 use Muffin\Webservice\Datasource\Query\SelectQuery;
 use Muffin\Webservice\Datasource\ResultSet;
 use Muffin\Webservice\Model\Endpoint;

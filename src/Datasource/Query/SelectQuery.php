@@ -9,7 +9,6 @@ use Cake\Database\ExpressionInterface;
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Datasource\QueryCacher;
 use Cake\Datasource\QueryInterface;
-use Cake\Datasource\RepositoryInterface;
 use Cake\Datasource\ResultSetDecorator;
 use Cake\Datasource\ResultSetInterface;
 use Cake\Utility\Hash;
@@ -21,9 +20,7 @@ use Muffin\Webservice\Datasource\Query;
 use Muffin\Webservice\Datasource\ResultSet;
 use Muffin\Webservice\Model\Endpoint;
 use Muffin\Webservice\Model\Resource;
-use Muffin\Webservice\Webservice\WebserviceInterface;
 use Traversable;
-use UnexpectedValueException;
 
 /**
  * @template TKey
@@ -83,9 +80,9 @@ class SelectQuery extends Query implements IteratorAggregate, JsonSerializable, 
     /**
      * The result from the webservice
      *
-     * @var \Muffin\Webservice\Model\Resource|\Cake\Datasource\ResultSetInterface|bool|int|null
+     * @var \Muffin\Webservice\Model\Resource|\Cake\Datasource\ResultSetInterface|int|bool|null
      */
-    protected Resource|ResultSetInterface|bool|int|null $_results = null;
+    protected Resource|ResultSetInterface|int|bool|null $_results = null;
 
     /**
      * Instance of a endpoint object this query is bound to
