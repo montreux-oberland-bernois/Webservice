@@ -41,16 +41,4 @@ class QueryTest extends TestCase
         $this->assertEquals($this->query, $this->query->delete());
         $this->assertEquals(Query::ACTION_DELETE, $this->query->clause('action'));
     }
-
-    public function testSet()
-    {
-        $this->query->update();
-
-        $this->assertEquals($this->query, $this->query->set([
-            'field' => 'value',
-        ]));
-        $this->assertEquals([
-            'field' => 'value',
-        ], $this->query->clause('set'));
-    }
 }

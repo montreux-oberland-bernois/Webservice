@@ -10,7 +10,6 @@ use Closure;
 use Muffin\Webservice\Model\Endpoint;
 use Muffin\Webservice\Model\Resource;
 use Muffin\Webservice\Webservice\WebserviceInterface;
-use UnexpectedValueException;
 
 class Query
 {
@@ -20,22 +19,12 @@ class Query
     public const ACTION_DELETE = 4;
 
     /**
-     * Indicates whether internal state of this query was changed, this is used to
-     * discard internal cached objects such as the transformed query or the reference
-     * to the executed statement.
-     *
-     * @var bool
-     */
-    protected bool $_dirty = false;
-
-    /**
      * Parts being used to in the query
      *
      * @var array
      */
     protected array $_parts = [
         'where' => [],
-        'set' => [],
     ];
 
     /**
@@ -238,23 +227,6 @@ class Query
     }
 
     /**
-     * Set fields to save in resources
-     *
-     * @param array $fields The field to set
-     * @return $this
-     */
-    public function set(array $fields)
-    {
-        if (!in_array($this->clause('action'), [self::ACTION_CREATE, self::ACTION_UPDATE])) {
-            throw new UnexpectedValueException('The action of this query needs to be either create update');
-        }
-
-        $this->_parts['set'] = $fields;
-
-        return $this;
-    }
-
-    /**
      * Execute the query
      *
      * @return \Muffin\Webservice\Model\Resource|\Cake\Datasource\ResultSetInterface|int|bool
@@ -262,5 +234,21 @@ class Query
     public function execute(): Resource|ResultSetInterface|bool|int
     {
         return $this->_webservice->execute($this);
+    }
+
+    /**
+     * Return a handy representation of the query
+     *
+     * @return array
+     */
+    public function __debugInfo(): array
+    {
+        return [
+            '(help)' => 'This is a Query object, to get the results execute or iterate it.',
+            'action' => $this->clause('action'),
+            'conditions' => $this->clause('where'),
+            'repository' => $this->getEndpoint(),
+            'webservice' => $this->getWebservice(),
+        ];
     }
 }

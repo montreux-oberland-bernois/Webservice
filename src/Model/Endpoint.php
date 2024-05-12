@@ -25,8 +25,10 @@ use Closure;
 use Exception;
 use Muffin\Webservice\Datasource\Connection;
 use Muffin\Webservice\Datasource\Marshaller;
-use Muffin\Webservice\Datasource\Query;
+use Muffin\Webservice\Datasource\Query\CreateQuery;
+use Muffin\Webservice\Datasource\Query\DeleteQuery;
 use Muffin\Webservice\Datasource\Query\ReadQuery;
+use Muffin\Webservice\Datasource\Query\UpdateQuery;
 use Muffin\Webservice\Datasource\Schema;
 use Muffin\Webservice\Model\Exception\MissingResourceClassException;
 use Muffin\Webservice\Webservice\WebserviceInterface;
@@ -601,10 +603,10 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      * By default findAll() applies no conditions, you
      * can override this method in subclasses to modify how `find('all')` works.
      *
-     * @param \Muffin\Webservice\Datasource\Query $query The query to find with
-     * @return \Muffin\Webservice\Datasource\Query The query builder
+     * @param \Muffin\Webservice\Datasource\Query\ReadQuery $query The query to find with
+     * @return \Muffin\Webservice\Datasource\Query\ReadQuery The query builder
      */
-    public function findAll(Query $query): Query
+    public function findAll(ReadQuery $query): ReadQuery
     {
         return $query;
     }
@@ -862,15 +864,13 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     }
 
     /**
-     * Creates a new insert query
+     * Creates a new create query
      *
      * @return \Muffin\Webservice\Datasource\Query
      */
-    public function insertQuery(): Query
+    public function createQuery(): CreateQuery
     {
-        $query = new Query($this->getWebservice(), $this);
-
-        return $query->action(Query::ACTION_CREATE);
+        return new CreateQuery($this->getWebservice(), $this);
     }
 
     /**
@@ -878,11 +878,9 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      *
      * @return \Muffin\Webservice\Datasource\Query
      */
-    public function updateQuery(): Query
+    public function updateQuery(): UpdateQuery
     {
-        $query = new Query($this->getWebservice(), $this);
-
-        return $query->action(Query::ACTION_UPDATE);
+        return new UpdateQuery($this->getWebservice(), $this);
     }
 
     /**
@@ -890,11 +888,9 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
      *
      * @return \Muffin\Webservice\Datasource\Query
      */
-    public function deleteQuery(): Query
+    public function deleteQuery(): DeleteQuery
     {
-        $query = new Query($this->getWebservice(), $this);
-
-        return $query->action(Query::ACTION_DELETE);
+        return new DeleteQuery($this->getWebservice(), $this);
     }
 
     /**
@@ -1025,7 +1021,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
         $data = $entity->extract($this->getSchema()->columns(), true);
 
         if ($entity->isNew()) {
-            $query = $this->insertQuery();
+            $query = $this->createQuery();
         } else {
             $query = $this->updateQuery()->where($entity->extract($primaryColumns));
         }

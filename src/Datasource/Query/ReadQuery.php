@@ -431,7 +431,7 @@ class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, Qu
      */
     public function first(): mixed
     {
-        if ($this->_dirty) {
+        if ($this->_results === null) {
             $this->limit(1);
         }
 
