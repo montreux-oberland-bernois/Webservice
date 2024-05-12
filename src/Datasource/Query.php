@@ -13,10 +13,12 @@ use Muffin\Webservice\Webservice\WebserviceInterface;
 
 class Query
 {
-    public const ACTION_CREATE = 1;
-    public const ACTION_READ = 2;
-    public const ACTION_UPDATE = 3;
-    public const ACTION_DELETE = 4;
+    /**
+     * Type of this query (create, read, update, delete).
+     *
+     * @var \Muffin\Webservice\Datasource\QueryType
+     */
+    protected QueryType $_type;
 
     /**
      * Parts being used to in the query
@@ -79,42 +81,6 @@ class Query
     public function getRepository(): Endpoint
     {
         return $this->_endpoint;
-    }
-
-    /**
-     * Mark the query as create
-     *
-     * @return $this
-     */
-    public function create()
-    {
-        $this->action(self::ACTION_CREATE);
-
-        return $this;
-    }
-
-    /**
-     * Mark the query as update
-     *
-     * @return $this
-     */
-    public function update()
-    {
-        $this->action(self::ACTION_UPDATE);
-
-        return $this;
-    }
-
-    /**
-     * Mark the query as delete
-     *
-     * @return $this
-     */
-    public function delete()
-    {
-        $this->action(self::ACTION_DELETE);
-
-        return $this;
     }
 
     /**
@@ -214,16 +180,13 @@ class Query
     }
 
     /**
-     * Charge this query's action
+     * Returns the type of this query (read, create, update, delete)
      *
-     * @param int $action Action to use
-     * @return $this
+     * @return \Muffin\Webservice\Datasource\QueryType
      */
-    public function action(int $action)
+    public function type(): QueryType
     {
-        $this->_parts['action'] = $action;
-
-        return $this;
+        return $this->_type;
     }
 
     /**

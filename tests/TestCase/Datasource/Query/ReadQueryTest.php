@@ -147,7 +147,6 @@ class ReadQueryTest extends TestCase
     {
         $this->assertEquals([
             '(help)' => 'This is a Query object, to get the results execute or iterate it.',
-            'action' => 2,
             'formatters' => [],
             'offset' => null,
             'page' => null,

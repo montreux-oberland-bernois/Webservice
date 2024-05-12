@@ -7,6 +7,7 @@ use Cake\Core\App;
 use Cake\Utility\Inflector;
 use Cake\Utility\Text;
 use Muffin\Webservice\Datasource\Query;
+use Muffin\Webservice\Datasource\QueryType;
 use Muffin\Webservice\Datasource\ResultSet;
 use Muffin\Webservice\Datasource\Schema;
 use Muffin\Webservice\Model\Endpoint;
@@ -210,12 +211,11 @@ abstract class Webservice implements WebserviceInterface
      */
     protected function _executeQuery(Query $query, array $options = []): bool|int|Resource|ResultSet
     {
-        return match ($query->clause('action')) {
-            Query::ACTION_CREATE => $this->_executeCreateQuery($query, $options),
-            Query::ACTION_READ => $this->_executeReadQuery($query, $options),
-            Query::ACTION_UPDATE => $this->_executeUpdateQuery($query, $options),
-            Query::ACTION_DELETE => $this->_executeDeleteQuery($query, $options),
-            default => false,
+        return match ($query->type()) {
+            QueryType::CREATE => $this->_executeCreateQuery($query, $options),
+            QueryType::READ => $this->_executeReadQuery($query, $options),
+            QueryType::UPDATE => $this->_executeUpdateQuery($query, $options),
+            QueryType::DELETE => $this->_executeDeleteQuery($query, $options),
         };
     }
 

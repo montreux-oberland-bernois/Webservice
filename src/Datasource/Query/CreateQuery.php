@@ -4,10 +4,13 @@ declare(strict_types=1);
 namespace Muffin\Webservice\Datasource\Query;
 
 use Muffin\Webservice\Datasource\Query;
+use Muffin\Webservice\Datasource\QueryType;
 
 class CreateQuery extends Query
 {
     use SaveTrait;
+
+    protected QueryType $_type = QueryType::CREATE;
 
     /**
      * Parts being used to in the query
@@ -15,7 +18,6 @@ class CreateQuery extends Query
      * @var array
      */
     protected array $_parts = [
-        'action' => self::ACTION_CREATE,
         'set' => [],
     ];
 

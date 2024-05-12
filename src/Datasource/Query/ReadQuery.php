@@ -17,6 +17,7 @@ use InvalidArgumentException;
 use IteratorAggregate;
 use JsonSerializable;
 use Muffin\Webservice\Datasource\Query;
+use Muffin\Webservice\Datasource\QueryType;
 use Muffin\Webservice\Datasource\ResultSet;
 use Muffin\Webservice\Model\Endpoint;
 use Muffin\Webservice\Model\Resource;
@@ -50,6 +51,8 @@ class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, Qu
      */
     public const OVERWRITE = true;
 
+    protected QueryType $_type = QueryType::READ;
+
     /**
      * True if the beforeFind event has already been triggered for this query
      *
@@ -66,7 +69,6 @@ class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, Qu
         'select' => [],
         'where' => [],
         'order' => [],
-        'action' => self::ACTION_READ,
     ];
 
     /**
@@ -707,7 +709,6 @@ class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, Qu
     {
         return [
             '(help)' => 'This is a Query object, to get the results execute or iterate it.',
-            'action' => $this->clause('action'),
             'formatters' => $this->_formatters,
             'offset' => $this->clause('offset'),
             'page' => $this->clause('page'),
