@@ -5,6 +5,7 @@ namespace Muffin\Webservice\Datasource\Query;
 
 use Muffin\Webservice\Datasource\Query;
 use Muffin\Webservice\Datasource\QueryType;
+use Muffin\Webservice\Model\Resource;
 
 class CreateQuery extends Query
 {
@@ -20,6 +21,23 @@ class CreateQuery extends Query
     protected array $_parts = [
         'set' => [],
     ];
+
+    /**
+     * Execute the query
+     *
+     * @return \Muffin\Webservice\Model\Resource|bool
+     */
+    public function execute(): Resource|bool
+    {
+        $return = $this->_webservice->execute($this);
+
+        assert(
+            $return instanceof Resource || is_bool($return),
+            sprintf('CreateQuery execution must return a resource or a boolean, got `%s`', get_debug_type($return))
+        );
+
+        return $return;
+    }
 
     /**
      * Return a handy representation of the query

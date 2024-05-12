@@ -20,7 +20,6 @@ use Muffin\Webservice\Datasource\Query;
 use Muffin\Webservice\Datasource\QueryType;
 use Muffin\Webservice\Datasource\ResultSet;
 use Muffin\Webservice\Model\Endpoint;
-use Muffin\Webservice\Model\Resource;
 use Traversable;
 
 /**
@@ -82,9 +81,9 @@ class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, Qu
     /**
      * The result from the webservice
      *
-     * @var \Muffin\Webservice\Model\Resource|\Cake\Datasource\ResultSetInterface|int|bool|null
+     * @var \Cake\Datasource\ResultSetInterface|null
      */
-    protected Resource|ResultSetInterface|int|bool|null $_results = null;
+    protected ?ResultSetInterface $_results = null;
 
     /**
      * Instance of a endpoint object this query is bound to
@@ -158,30 +157,26 @@ class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, Qu
      */
     public function all(): ResultSetInterface
     {
-        if (is_iterable($this->_results)) {
-            if (!$this->_results instanceof ResultSetInterface) {
-                $this->_results = $this->decorateResults($this->_results);
-            }
-
+        if ($this->_results !== null) {
             return $this->_results;
         }
 
         /** @psalm-suppress InternalMethod Could not find a better way apart from implementing it as a custom class **/
         $results = $this->_cache?->fetch($this);
         if ($results === null) {
-            $res = $this->execute();
+            $results = $this->execute();
 
-            if (!is_iterable($res)) {
-                return $this->_results = new ResultSet([$res], 1);
+            if (is_bool($results)) {
+                $results = new ResultSet([], 0);
+            } else {
+                $results = $this->decorateResults($results);
             }
 
-            $results = $this->decorateResults($res);
             /** @psalm-suppress InternalMethod Could not find a better way apart from implementing it as a custom class **/
             $this->_cache?->store($this, $results);
         }
-        $this->_results = $results;
 
-        return $this->_results;
+        return $this->_results = $results;
     }
 
     /**
@@ -378,22 +373,7 @@ class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, Qu
      */
     public function count(): int
     {
-        if ($this->_results === null) {
-            $this->execute();
-        }
-
-        if ($this->_results instanceof ResultSet) {
-            return (int)$this->_results->total();
-        }
-        if ($this->_results instanceof ResultSetInterface) {
-            return $this->_results->count();
-        }
-        if ($this->_results === null) {
-            return 0;
-        }
-
-        // There is a single integer or boolean value
-        return 1;
+        return $this->all()->count();
     }
 
     /**
@@ -538,22 +518,24 @@ class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, Qu
     /**
      * Execute the query
      *
-     * @return \Muffin\Webservice\Model\Resource|\Cake\Datasource\ResultSetInterface|int|bool
+     * @return \Cake\Datasource\ResultSetInterface|bool
      */
-    public function execute(): bool|int|Resource|ResultSetInterface
+    public function execute(): ResultSetInterface|bool
     {
         $this->triggerBeforeFind();
 
-        if ($this->_results !== null) {
-            $decorator = $this->decoratorClass();
-            if (is_iterable($this->_results) && !($this->_results instanceof $decorator)) {
-                $this->_results = new $decorator($this->_results);
-            }
-
+        if ($this->_results) {
             return $this->_results;
         }
 
-        return $this->_results = $this->_webservice->execute($this);
+        $return = $this->_webservice->execute($this);
+
+        assert(
+            $return instanceof ResultSetInterface || is_bool($return),
+            sprintf('CreateQuery execution must return a ResultSet or a boolean, got `%s`', get_debug_type($return))
+        );
+
+        return $return;
     }
 
     /**

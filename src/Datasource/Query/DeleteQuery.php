@@ -11,11 +11,19 @@ class DeleteQuery extends Query
     protected QueryType $_type = QueryType::DELETE;
 
     /**
-     * Parts being used to in the query
+     * Execute the query
      *
-     * @var array
+     * @return int|bool
      */
-    protected array $_parts = [
-        'where' => [],
-    ];
+    public function execute(): int|bool
+    {
+        $return = $this->_webservice->execute($this);
+
+        assert(
+            is_int($return) || is_bool($return),
+            sprintf('DeleteQuery execution must return an integer or a boolean, got `%s`', get_debug_type($return))
+        );
+
+        return $return;
+    }
 }

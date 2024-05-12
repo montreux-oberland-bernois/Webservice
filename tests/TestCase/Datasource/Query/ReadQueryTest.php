@@ -108,7 +108,7 @@ class ReadQueryTest extends TestCase
         ], $this->query->clause('order'));
     }
 
-    public function testExecuteTwice()
+    public function testAllTwice()
     {
         $mockWebservice = $this
             ->getMockBuilder('\TestApp\Webservice\StaticWebservice')
@@ -137,10 +137,10 @@ class ReadQueryTest extends TestCase
         $this->query
             ->setWebservice($mockWebservice);
 
-        $this->query->execute();
+        $this->query->all();
 
         // This webservice shouldn't be called a second time
-        $this->query->execute();
+        $this->query->all();
     }
 
     public function testDebugInfo()

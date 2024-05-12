@@ -5,6 +5,7 @@ namespace Muffin\Webservice\Datasource\Query;
 
 use Muffin\Webservice\Datasource\Query;
 use Muffin\Webservice\Datasource\QueryType;
+use Muffin\Webservice\Model\Resource;
 
 class UpdateQuery extends Query
 {
@@ -21,4 +22,24 @@ class UpdateQuery extends Query
         'where' => [],
         'set' => [],
     ];
+
+    /**
+     * Execute the query
+     *
+     * @return \Muffin\Webservice\Model\Resource|int|bool
+     */
+    public function execute(): Resource|bool|int
+    {
+        $return = $this->_webservice->execute($this);
+
+        assert(
+            is_int($return) || is_bool($return) || $return instanceof Resource,
+            sprintf(
+                'UpdateQuery execution must return a resource, or an integer or a boolean, got `%s`',
+                get_debug_type($return)
+            )
+        );
+
+        return $return;
+    }
 }
