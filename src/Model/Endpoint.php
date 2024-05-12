@@ -866,7 +866,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     /**
      * Creates a new create query
      *
-     * @return \Muffin\Webservice\Datasource\Query
+     * @return \Muffin\Webservice\Datasource\Query\CreateQuery
      */
     public function createQuery(): CreateQuery
     {
@@ -876,7 +876,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     /**
      * Creates a new update query
      *
-     * @return \Muffin\Webservice\Datasource\Query
+     * @return \Muffin\Webservice\Datasource\Query\UpdateQuery
      */
     public function updateQuery(): UpdateQuery
     {
@@ -886,7 +886,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     /**
      * Creates a new delete query
      *
-     * @return \Muffin\Webservice\Datasource\Query
+     * @return \Muffin\Webservice\Datasource\Query\DeleteQuery
      */
     public function deleteQuery(): DeleteQuery
     {
