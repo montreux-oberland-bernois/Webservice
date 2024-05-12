@@ -11,7 +11,7 @@ use Muffin\Webservice\Model\Endpoint;
 use Muffin\Webservice\Model\Resource;
 use Muffin\Webservice\Webservice\WebserviceInterface;
 
-class Query
+abstract class Query
 {
     /**
      * Type of this query (create, read, update, delete).
