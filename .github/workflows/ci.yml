@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - cake5
   pull_request:
     branches:
       - '*'
@@ -16,11 +17,11 @@ jobs:
       matrix:
         php-version: ['8.1', '8.2', '8.3']
         db-type: ['mysql', 'pgsql']
-        prefer-lowest: ['']
+        dependencies: [highest]
         include:
           - php-version: '8.1'
             db-type: 'sqlite'
-            prefer-lowest: 'prefer-lowest'
+            dependencies: lowest
 
     services:
       postgres:
@@ -47,13 +48,9 @@ jobs:
         coverage: pcov
 
     - name: Composer install
-      run: |
-        composer --version
-        if ${{ matrix.prefer-lowest == 'prefer-lowest' }}; then
-          composer update --prefer-lowest --prefer-stable
-        else
-          composer install
-        fi
+      uses: ramsey/composer-install@v3
+      with:
+        dependency-versions: ${{ matrix.dependencies }}
 
     - name: Run PHPUnit
       run: |
@@ -62,21 +59,21 @@ jobs:
         if [[ ${{ matrix.db-type }} == 'pgsql' ]]; then export DB_URL='postgres://postgres:postgres@127.0.0.1/postgres'; fi
 
         if [[ ${{ matrix.php-version }} == '8.1' && ${{ matrix.db-type }} == 'mysql' ]]; then
-          vendor/bin/phpunit tests/TestCase --coverage-clover=coverage.xml
+          vendor/bin/phpunit --coverage-clover=coverage.xml
         else
-          vendor/bin/phpunit tests/TestCase
+          vendor/bin/phpunit
         fi
 
     - name: Code Coverage Report
       if: success() && matrix.php-version == '8.1' && matrix.db-type == 'mysql'
-      uses: codecov/codecov-action@v1
+      uses: codecov/codecov-action@v4
 
   cs-stan:
     name: Coding Standard & Static Analysis
     runs-on: ubuntu-22.04
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -84,15 +81,18 @@ jobs:
         php-version: '8.1'
         extensions: mbstring, intl
         coverage: none
-        tools: psalm:5, phpstan:1.10
+        tools: psalm:5, phpstan:1.10, cs2pr
+
+    - name: Composer install
+      uses: ramsey/composer-install@v3
 
     - name: Run phpcs
-      run: vendor/bin/phpcs --standard=CakePHP src/ tests/
+      run: vendor/bin/phpcs --report=checkstyle | cs2pr
 
     - name: Run psalm
-      if: success() || failure()
+      if: always()
       run: psalm --output-format=github
 
     - name: Run phpstan
-      if: success() || failure()
+      if: always()
       run: phpstan analyse
