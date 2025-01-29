@@ -176,7 +176,7 @@ class Query implements IteratorAggregate, JsonSerializable, QueryInterface
      */
     public function setEndpoint(Endpoint $endpoint)
     {
-        $this->repository($endpoint);
+        $this->setRepository($endpoint);
 
         return $this;
     }
