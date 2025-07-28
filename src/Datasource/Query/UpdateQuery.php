@@ -36,8 +36,8 @@ class UpdateQuery extends Query
             is_int($return) || is_bool($return) || $return instanceof Resource,
             sprintf(
                 'UpdateQuery execution must return a resource, or an integer or a boolean, got `%s`',
-                get_debug_type($return)
-            )
+                get_debug_type($return),
+            ),
         );
 
         return $return;

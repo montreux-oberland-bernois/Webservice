@@ -33,7 +33,7 @@ class CreateQuery extends Query
 
         assert(
             $return instanceof Resource || is_bool($return),
-            sprintf('CreateQuery execution must return a resource or a boolean, got `%s`', get_debug_type($return))
+            sprintf('CreateQuery execution must return a resource or a boolean, got `%s`', get_debug_type($return)),
         );
 
         return $return;

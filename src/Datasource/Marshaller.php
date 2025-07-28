@@ -125,7 +125,7 @@ class Marshaller
         if (!is_callable([$validator, 'validate'])) {
             throw new RuntimeException(sprintf(
                 '"validate" must be a boolean, a string or an object with method "errors()". Got %s instead.',
-                gettype($options['validate'])
+                gettype($options['validate']),
             ));
         }
 

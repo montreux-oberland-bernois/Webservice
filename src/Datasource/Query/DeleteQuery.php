@@ -21,7 +21,7 @@ class DeleteQuery extends Query
 
         assert(
             is_int($return) || is_bool($return),
-            sprintf('DeleteQuery execution must return an integer or a boolean, got `%s`', get_debug_type($return))
+            sprintf('DeleteQuery execution must return an integer or a boolean, got `%s`', get_debug_type($return)),
         );
 
         return $return;

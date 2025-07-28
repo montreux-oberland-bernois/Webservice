@@ -45,7 +45,7 @@ class EndpointLocator extends AbstractLocator
 
         assert(
             $parentRes instanceof Endpoint,
-            'The repository found is not of type Endpoint, but a different type implementing RepositoryInterface'
+            'The repository found is not of type Endpoint, but a different type implementing RepositoryInterface',
         );
 
         return $parentRes;

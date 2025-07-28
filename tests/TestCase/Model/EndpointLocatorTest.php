@@ -85,7 +85,7 @@ class EndpointLocatorTest extends TestCase
         $this->expectException(MissingDatasourceConfigException::class);
         $this->expectExceptionMessage(
             'The datasource configuration `non-existent` was not found.'
-            . ' You can override Endpoint::defaultConnectionName() to return the connection name you want.'
+            . ' You can override Endpoint::defaultConnectionName() to return the connection name you want.',
         );
 
         $locator = new EndpointLocator();

@@ -64,7 +64,7 @@ class MarshallerTest extends TestCase
             [
                 'fieldList' => ['title'],
                 'validate' => false,
-            ]
+            ],
         );
 
         $this->assertInstanceOf(Resource::class, $result);
@@ -82,7 +82,7 @@ class MarshallerTest extends TestCase
             [
                 'accessibleFields' => ['body' => false],
                 'validate' => false,
-            ]
+            ],
         );
 
         $this->assertInstanceOf(Resource::class, $result);
@@ -100,7 +100,7 @@ class MarshallerTest extends TestCase
             [
                 'fieldList' => [],
                 'validate' => false,
-            ]
+            ],
         );
 
         $this->assertInstanceOf(Resource::class, $result);
@@ -118,7 +118,7 @@ class MarshallerTest extends TestCase
             [
                 'accessibleFields' => ['title' => false, 'body' => false],
                 'validate' => false,
-            ]
+            ],
         );
 
         $this->assertInstanceOf(Resource::class, $result);
@@ -142,7 +142,7 @@ class MarshallerTest extends TestCase
                 'fieldList' => ['title', 'body'],
                 'accessibleFields' => ['title' => false, 'body' => false],
                 'validate' => false,
-            ]
+            ],
         );
 
         $this->assertInstanceOf(Resource::class, $result);
@@ -156,7 +156,7 @@ class MarshallerTest extends TestCase
             [
                 'title' => 'Testing one',
                 'body' => 'Foo',
-            ]
+            ],
         );
 
         $this->assertInstanceOf(Resource::class, $result);
@@ -164,7 +164,7 @@ class MarshallerTest extends TestCase
         $this->assertNull($result->get('body'));
         $this->assertEquals(
             ['body' => ['minLength' => 'Must be 5 characters or longer']],
-            $result->getErrors()
+            $result->getErrors(),
         );
         $this->assertEquals('Foo', $result->getInvalidField('body'));
     }
@@ -242,7 +242,7 @@ class MarshallerTest extends TestCase
         $this->assertEquals('Longer body', $entity->get('body'));
         $this->assertEquals(
             ['body' => ['minLength' => 'Must be 5 characters or longer']],
-            $result->getErrors()
+            $result->getErrors(),
         );
         $this->assertEquals('Foo', $result->getInvalidField('body'));
     }
@@ -267,7 +267,7 @@ class MarshallerTest extends TestCase
                 'fieldList' => ['title'],
                 'accessibleFields' => ['title' => true, 'body' => false],
                 'validate' => false,
-            ]
+            ],
         );
 
         $this->assertInstanceOf(EntityInterface::class, $result);

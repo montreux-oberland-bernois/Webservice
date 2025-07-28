@@ -51,7 +51,7 @@ class Connection implements ConnectionInterface
 
         assert(
             $tempDriver instanceof AbstractDriver,
-            '`$config[\'driver\']` must be an instance of `' . AbstractDriver::class . '`.'
+            '`$config[\'driver\']` must be an instance of `' . AbstractDriver::class . '`.',
         );
         $this->_driver = $tempDriver;
     }

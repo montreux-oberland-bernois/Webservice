@@ -53,7 +53,7 @@ class SchemaTest extends TestCase
                 'comment' => null,
                 'primaryKey' => null,
             ],
-            $this->schema->getColumn('id')
+            $this->schema->getColumn('id'),
         );
     }
 
@@ -98,7 +98,7 @@ class SchemaTest extends TestCase
     {
         $this->assertEquals(
             ['id' => 'int', 'title' => 'string', 'body' => 'string'],
-            $this->schema->typeMap()
+            $this->schema->typeMap(),
         );
     }
 

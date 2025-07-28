@@ -108,13 +108,13 @@ class EndpointTest extends TestCase
             3 => 'Webservices',
             ],
             $this->endpoint->find('list')->toArray(),
-            'Id => valueField'
+            'Id => valueField',
         );
 
         $result = $this->endpoint->find(
             'list',
             keyField: 'title',
-            valueField: 'body'
+            valueField: 'body',
         )
         ->toArray();
 
@@ -406,7 +406,7 @@ class EndpointTest extends TestCase
         $endpoint->setSchema($schema);
         $this->assertEquals(
             new Schema('another', $schema),
-            $endpoint->getSchema()
+            $endpoint->getSchema(),
         );
     }
 

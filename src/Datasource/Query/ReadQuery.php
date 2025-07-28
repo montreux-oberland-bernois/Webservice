@@ -435,7 +435,7 @@ class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, Qu
 
         throw new RecordNotFoundException(sprintf(
             'Record not found in endpoint "%s"',
-            $this->_endpoint->getName()
+            $this->_endpoint->getName(),
         ));
     }
 
@@ -532,7 +532,7 @@ class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, Qu
 
         assert(
             $return instanceof ResultSetInterface || is_bool($return),
-            sprintf('CreateQuery execution must return a ResultSet or a boolean, got `%s`', get_debug_type($return))
+            sprintf('CreateQuery execution must return a ResultSet or a boolean, got `%s`', get_debug_type($return)),
         );
 
         return $return;

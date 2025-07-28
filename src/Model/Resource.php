@@ -60,7 +60,7 @@ class Resource implements EntityInterface, InvalidPropertyInterface
         if (!empty($properties)) {
             foreach ($properties as $field => $value) {
                 $this->set($field, $value, [
-                    'setter' => $options['useSetters']
+                    'setter' => $options['useSetters'],
                 ]);
             }
         }

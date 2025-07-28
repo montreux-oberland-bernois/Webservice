@@ -341,7 +341,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     {
         assert(
             $this->_connection !== null,
-            'Connection is null, there is no connection to return.'
+            'Connection is null, there is no connection to return.',
         );
 
         return $this->_connection;
@@ -666,22 +666,21 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
         Closure|array|string|null $keyField = null,
         Closure|array|string|null $valueField = null,
         Closure|array|string|null $groupField = null,
-        string $valueSeparator = ';'
+        string $valueSeparator = ';',
     ): ReadQuery {
         $keyField ??= $this->getPrimaryKey();
         $valueField ??= $this->getDisplayField();
 
         $options = $this->_setFieldMatchers(
             compact('keyField', 'valueField', 'groupField', 'valueSeparator'),
-            ['keyField', 'valueField', 'groupField']
+            ['keyField', 'valueField', 'groupField'],
         );
 
-        return $query->formatResults(fn (CollectionInterface $results) =>
-            $results->combine(
-                $options['keyField'],
-                $options['valueField'],
-                $options['groupField']
-            ));
+        return $query->formatResults(fn(CollectionInterface $results) => $results->combine(
+            $options['keyField'],
+            $options['valueField'],
+            $options['groupField'],
+        ));
     }
 
     /**
@@ -754,7 +753,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
         array|string $finder = 'all',
         CacheInterface|string|null $cache = null,
         Closure|string|null $cacheKey = null,
-        mixed ...$args
+        mixed ...$args,
     ): EntityInterface {
         $key = (array)$this->getPrimaryKey();
         foreach ($key as $index => $keyname) {
@@ -770,7 +769,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
             throw new InvalidPrimaryKeyException(sprintf(
                 'Record not found in endpoint "%s" with primary key [%s]',
                 $this->getName(),
-                implode(', ', $primaryKey)
+                implode(', ', $primaryKey),
             ));
         }
         $conditions = array_combine($key, $primaryKey);
@@ -788,7 +787,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
                     'get:%s.%s%s',
                     $this->getConnection()->configName(),
                     $this->getName(),
-                    json_encode($primaryKey)
+                    json_encode($primaryKey),
                 );
             }
             $cache($cacheKey, $cacheConfig);
@@ -1093,7 +1092,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
         throw new BadMethodCallException(sprintf(
             'Unknown finder method `%s` on `%s`.',
             $type,
-            static::class
+            static::class,
         ));
     }
 
@@ -1129,7 +1128,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
                 deprecationWarning(
                     '5.0.0',
                     'Calling finders with options arrays is deprecated.'
-                    . ' Update your finder methods to used named arguments instead.'
+                    . ' Update your finder methods to used named arguments instead.',
                 );
                 $args = $args[0];
             }
@@ -1154,7 +1153,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
             deprecationWarning(
                 '4.0.0',
                 "Calling `{$reflected->getName()}` finder with options array is deprecated."
-                 . ' Use named arguments instead.'
+                 . ' Use named arguments instead.',
             );
 
             $args = $args[0];
@@ -1216,7 +1215,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
                 throw new BadMethodCallException(sprintf(
                     'Not enough arguments for magic finder. Got %s required %s',
                     count($args),
-                    count($fields)
+                    count($fields),
                 ));
             }
             foreach ($fields as $field) {
@@ -1228,7 +1227,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
 
         if ($hasOr !== false && $hasAnd !== false) {
             throw new BadMethodCallException(
-                'Cannot mix "and" & "or" in a magic finder. Use find() instead.'
+                'Cannot mix "and" & "or" in a magic finder. Use find() instead.',
             );
         }
 
@@ -1262,7 +1261,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
         }
 
         throw new BadMethodCallException(
-            sprintf('Unknown method "%s"', $method)
+            sprintf('Unknown method "%s"', $method),
         );
     }
 

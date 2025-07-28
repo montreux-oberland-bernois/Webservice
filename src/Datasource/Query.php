@@ -65,7 +65,7 @@ abstract class Query
     {
         assert(
             $repository instanceof Endpoint,
-            '`$repository` must be an instance of `' . Endpoint::class . '`.'
+            '`$repository` must be an instance of `' . Endpoint::class . '`.',
         );
         $this->_endpoint = $repository;
 
@@ -160,7 +160,7 @@ abstract class Query
     public function where(
         Closure|array|string|null $conditions = null,
         array $types = [],
-        bool $overwrite = false
+        bool $overwrite = false,
     ) {
         if ($conditions === null) {
             $conditions = [];
