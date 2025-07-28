@@ -78,7 +78,9 @@ class Marshaller
         }
 
         if (!isset($options['fieldList'])) {
-            $entity->set($properties);
+            foreach ($properties as $field => $value) {
+                $entity->set($field, $value, $options);
+            }
             $entity->setErrors($errors);
 
             return $entity;
@@ -139,7 +141,7 @@ class Marshaller
      */
     protected function _prepareDataAndOptions(array $data, array $options): array
     {
-        $options += ['validate' => true];
+        $options += ['validate' => true, 'guard' => true];
 
         $endpointName = $this->_endpoint->getAlias();
         if (isset($data[$endpointName])) {

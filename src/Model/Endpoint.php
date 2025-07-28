@@ -594,7 +594,7 @@ class Endpoint implements RepositoryInterface, EventListenerInterface, EventDisp
     {
         $query = $this->readQuery();
 
-        return $this->callFinder($type, $query, $args);
+        return $this->callFinder($type, $query, ...$args);
     }
 
     /**

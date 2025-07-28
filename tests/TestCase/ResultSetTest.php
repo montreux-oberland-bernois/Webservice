@@ -5,7 +5,7 @@ namespace Muffin\Webservice\Test\TestCase;
 
 use Cake\TestSuite\TestCase;
 use Muffin\Webservice\Datasource\ResultSet;
-use Muffin\Webservice\Model\Resource;
+use Muffin\Webservice\Test\TestCase\Fixture\ResourceFixture;
 
 class ResultSetTest extends TestCase
 {
@@ -21,20 +21,7 @@ class ResultSetTest extends TestCase
     {
         parent::setUp();
 
-        $this->resultSet = new ResultSet([
-            new Resource([
-                'id' => 1,
-                'title' => 'Hello World',
-            ]),
-            new Resource([
-                'id' => 2,
-                'title' => 'New ORM',
-            ]),
-            new Resource([
-                'id' => 3,
-                'title' => 'Webservices',
-            ]),
-        ], 6);
+        $this->resultSet = new ResultSet(ResourceFixture::getFixtures(), 6);
     }
 
     public function testCount()

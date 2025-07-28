@@ -98,7 +98,9 @@ class EndpointTestWebservice extends Webservice
 
     protected function _executeUpdateQuery(Query $query, array $options = []): int|bool|Resource
     {
-        $this->resources[$this->conditionsToIndex($query->clause('where'))]->set($query->clause('set'));
+        foreach ($query->clause('set') as $field => $value) {
+            $this->resources[$this->conditionsToIndex($query->clause('where'))]->set($field, $value);
+        }
 
         $this->resources[$this->conditionsToIndex($query->clause('where'))]->clean();
 

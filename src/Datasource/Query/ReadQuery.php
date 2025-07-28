@@ -396,7 +396,7 @@ class ReadQuery extends Query implements IteratorAggregate, JsonSerializable, Qu
     public function find(string $finder, mixed ...$args): static
     {
         /** @psalm-suppress LessSpecificReturnStatement Couldn't get it to work with the interface and has no impact **/
-        return $this->_endpoint->callFinder($finder, $this, $args); /* @phpstan-ignore-line */
+        return $this->_endpoint->callFinder($finder, $this, ...$args); /* @phpstan-ignore-line */
     }
 
     /**

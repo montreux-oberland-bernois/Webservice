@@ -233,17 +233,18 @@ class EndpointTest extends TestCase
             'body' => 'New entity body',
         ]);
         $resource1->setSource('test');
+        $resource1->setDirty('title');
+        $resource1->setDirty('body');
 
         $resource2 = new Resource([
             'title' => 'Second new entity',
             'body' => 'Second new entity body',
         ]);
         $resource2->setSource('test');
+        $resource2->setDirty('title');
+        $resource2->setDirty('body');
 
-        $this->assertEquals([
-            $resource1,
-            $resource2,
-        ], $this->endpoint->newEntities([
+        $entities = $this->endpoint->newEntities([
             [
                 'title' => 'New entity',
                 'body' => 'New entity body',
@@ -252,7 +253,12 @@ class EndpointTest extends TestCase
                 'title' => 'Second new entity',
                 'body' => 'Second new entity body',
             ],
-        ]));
+        ]);
+
+        $this->assertEquals([
+            $resource1,
+            $resource2,
+        ], $entities);
     }
 
     public function testDefaultConnectionName()

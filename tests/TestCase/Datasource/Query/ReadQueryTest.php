@@ -8,12 +8,13 @@ use Cake\TestSuite\TestCase;
 use Muffin\Webservice\Datasource\Query\ReadQuery;
 use Muffin\Webservice\Datasource\ResultSet;
 use Muffin\Webservice\Model\Endpoint;
-use Muffin\Webservice\Model\Resource;
+use Muffin\Webservice\Test\TestCase\Fixture\ResourceFixture;
 use TestApp\Webservice\StaticWebservice;
 
 class ReadQueryTest extends TestCase
 {
     protected ReadQuery $query;
+    protected array $fixtures = [];
 
     /**
      * @inheritDoc
@@ -23,6 +24,7 @@ class ReadQueryTest extends TestCase
         parent::setUp();
 
         $this->query = new ReadQuery(new StaticWebservice(), new Endpoint());
+        $this->fixtures = ResourceFixture::getFixtures();
     }
 
     public function testAliasField()
@@ -37,10 +39,7 @@ class ReadQueryTest extends TestCase
 
     public function testFirst()
     {
-        $this->assertEquals(new Resource([
-            'id' => 1,
-            'title' => 'Hello World',
-        ]), $this->query->first());
+        $this->assertEquals($this->fixtures[0], $this->query->first());
     }
 
     public function testApplyOptions()
@@ -119,20 +118,7 @@ class ReadQueryTest extends TestCase
 
         $mockWebservice->expects($this->once())
             ->method('execute')
-            ->willReturn(new ResultSet([
-                new Resource([
-                    'id' => 1,
-                    'title' => 'Hello World',
-                ]),
-                new Resource([
-                    'id' => 2,
-                    'title' => 'New ORM',
-                ]),
-                new Resource([
-                    'id' => 3,
-                    'title' => 'Webservices',
-                ]),
-            ], 3));
+            ->willReturn(new ResultSet($this->fixtures, 3));
 
         $this->query
             ->setWebservice($mockWebservice);
