@@ -7,6 +7,10 @@ use Cake\Core\App;
 use Cake\Utility\Inflector;
 use Cake\Utility\Text;
 use Muffin\Webservice\Datasource\Query;
+use Muffin\Webservice\Datasource\Query\CreateQuery;
+use Muffin\Webservice\Datasource\Query\DeleteQuery;
+use Muffin\Webservice\Datasource\Query\ReadQuery;
+use Muffin\Webservice\Datasource\Query\UpdateQuery;
 use Muffin\Webservice\Datasource\QueryType;
 use Muffin\Webservice\Datasource\ResultSet;
 use Muffin\Webservice\Datasource\Schema;
@@ -222,13 +226,13 @@ abstract class Webservice implements WebserviceInterface
     /**
      * Executes a query with the create action
      *
-     * @param \Muffin\Webservice\Datasource\Query $query The query to execute
+     * @param \Muffin\Webservice\Datasource\Query\CreateQuery $query The query to execute
      * @param array $options The options to use
      * @return \Muffin\Webservice\Model\Resource|bool
      * @throws \Muffin\Webservice\Webservice\Exception\UnimplementedWebserviceMethodException When this method has not been
      * implemented into userland classes
      */
-    protected function _executeCreateQuery(Query $query, array $options = []): bool|Resource
+    protected function _executeCreateQuery(CreateQuery $query, array $options = []): bool|Resource
     {
         throw new UnimplementedWebserviceMethodException([
             'name' => static::class,
@@ -239,13 +243,13 @@ abstract class Webservice implements WebserviceInterface
     /**
      * Executes a query with the read action
      *
-     * @param \Muffin\Webservice\Datasource\Query $query The query to execute
+     * @param \Muffin\Webservice\Datasource\Query\ReadQuery $query The query to execute
      * @param array $options The options to use
      * @return \Muffin\Webservice\Datasource\ResultSet|bool
      * @throws \Muffin\Webservice\Webservice\Exception\UnimplementedWebserviceMethodException When this method has not been
      * implemented into userland classes
      */
-    protected function _executeReadQuery(Query $query, array $options = []): bool|ResultSet
+    protected function _executeReadQuery(ReadQuery $query, array $options = []): bool|ResultSet
     {
         throw new UnimplementedWebserviceMethodException([
             'name' => static::class,
@@ -256,13 +260,13 @@ abstract class Webservice implements WebserviceInterface
     /**
      * Executes a query with the update action
      *
-     * @param \Muffin\Webservice\Datasource\Query $query The query to execute
+     * @param \Muffin\Webservice\Datasource\Query\UpdateQuery $query The query to execute
      * @param array $options The options to use
      * @return \Muffin\Webservice\Model\Resource|int|bool
      * @throws \Muffin\Webservice\Webservice\Exception\UnimplementedWebserviceMethodException When this method has not been
      * implemented into userland classes
      */
-    protected function _executeUpdateQuery(Query $query, array $options = []): int|bool|Resource
+    protected function _executeUpdateQuery(UpdateQuery $query, array $options = []): int|bool|Resource
     {
         throw new UnimplementedWebserviceMethodException([
             'name' => static::class,
@@ -273,13 +277,13 @@ abstract class Webservice implements WebserviceInterface
     /**
      * Executes a query with the delete action
      *
-     * @param \Muffin\Webservice\Datasource\Query $query The query to execute
+     * @param \Muffin\Webservice\Datasource\Query\DeleteQuery $query The query to execute
      * @param array $options The options to use
      * @return int|bool
      * @throws \Muffin\Webservice\Webservice\Exception\UnimplementedWebserviceMethodException When this method has not been
      * implemented into userland classes
      */
-    protected function _executeDeleteQuery(Query $query, array $options = []): int|bool
+    protected function _executeDeleteQuery(DeleteQuery $query, array $options = []): int|bool
     {
         throw new UnimplementedWebserviceMethodException([
             'name' => static::class,
