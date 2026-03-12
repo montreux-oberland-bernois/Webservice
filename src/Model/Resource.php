@@ -7,6 +7,9 @@ use Cake\Datasource\EntityInterface;
 use Cake\Datasource\EntityTrait;
 use Cake\Datasource\InvalidPropertyInterface;
 
+/**
+ * @psalm-consistent-constructor
+ */
 class Resource implements EntityInterface, InvalidPropertyInterface
 {
     use EntityTrait;
@@ -55,10 +58,11 @@ class Resource implements EntityInterface, InvalidPropertyInterface
         }
 
         if (!empty($properties)) {
-            $this->set($properties, [
-                'setter' => $options['useSetters'],
-                'guard' => $options['guard'],
-            ]);
+            foreach ($properties as $field => $value) {
+                $this->set($field, $value, [
+                    'setter' => $options['useSetters'],
+                ]);
+            }
         }
 
         if ($options['markClean']) {

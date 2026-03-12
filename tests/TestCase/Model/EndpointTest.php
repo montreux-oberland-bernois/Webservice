@@ -3,12 +3,14 @@ declare(strict_types=1);
 
 namespace Muffin\Webservice\Test\TestCase\Model;
 
+use AllowDynamicProperties;
 use BadMethodCallException;
 use Cake\Datasource\Exception\RecordNotFoundException;
 use Cake\Event\EventManager;
 use Cake\TestSuite\TestCase;
 use Muffin\Webservice\Datasource\Connection;
 use Muffin\Webservice\Datasource\Query;
+use Muffin\Webservice\Datasource\Query\ReadQuery;
 use Muffin\Webservice\Datasource\Schema;
 use Muffin\Webservice\Model\Endpoint;
 use Muffin\Webservice\Model\Exception\MissingResourceClassException;
@@ -20,17 +22,18 @@ use TestApp\Model\Endpoint\ExampleEndpoint;
 use TestApp\Model\Endpoint\TestEndpoint;
 use TestApp\Webservice\TestWebservice;
 
+#[AllowDynamicProperties]
 class EndpointTest extends TestCase
 {
     /**
-     * @var \Muffin\Webservice\Connection
+     * @var Connection|null
      */
-    protected $connection;
+    protected ?Connection $connection;
 
     /**
-     * @var Endpoint
+     * @var Endpoint|null
      */
-    protected $endpoint;
+    protected ?Endpoint $endpoint;
 
     /**
      * @inheritDoc
@@ -50,7 +53,7 @@ class EndpointTest extends TestCase
         ]);
     }
 
-    public function providerEndpointNames()
+    public static function providerEndpointNames(): array
     {
         return [
             'No inflector' => ['user-groups', null, 'user_groups'],
@@ -65,7 +68,7 @@ class EndpointTest extends TestCase
      * @param string|null $inflector
      * @param string $expected
      */
-    public function testEndpointName($name, $inflector, $expected)
+    public function testEndpointName(string $name, ?string $inflector, string $expected)
     {
         $endpoint = new Endpoint(['name' => $name, 'inflect' => $inflector]);
         $this->assertSame($expected, $endpoint->getName());
@@ -98,20 +101,28 @@ class EndpointTest extends TestCase
 
     public function testFindList()
     {
-        $this->assertEquals([
+        $this->assertEquals(
+            [
             1 => 'Hello World',
             2 => 'New ORM',
             3 => 'Webservices',
-        ], $this->endpoint->find('list')->toArray());
+            ],
+            $this->endpoint->find('list')->toArray(),
+            'Id => valueField',
+        );
+
+        $result = $this->endpoint->find(
+            'list',
+            keyField: 'title',
+            valueField: 'body',
+        )
+        ->toArray();
 
         $this->assertEquals([
             'Hello World' => 'Some text',
             'New ORM' => 'Some more text',
             'Webservices' => 'Even more text',
-        ], $this->endpoint->find('list', [
-            'keyField' => 'title',
-            'valueField' => 'body',
-        ])->toArray());
+        ], $result, 'Find with options array');
     }
 
     public function testGet()
@@ -176,7 +187,7 @@ class EndpointTest extends TestCase
         $this->assertFalse($savedResource->isNew());
 
         $newResource = $this->endpoint->get(2);
-        $this->assertEquals($newResource->title, 'New ORM for webservices');
+        $this->assertEquals('New ORM for webservices', $newResource->title);
     }
 
     public function testDelete()
@@ -222,17 +233,18 @@ class EndpointTest extends TestCase
             'body' => 'New entity body',
         ]);
         $resource1->setSource('test');
+        $resource1->setDirty('title');
+        $resource1->setDirty('body');
 
         $resource2 = new Resource([
             'title' => 'Second new entity',
             'body' => 'Second new entity body',
         ]);
         $resource2->setSource('test');
+        $resource2->setDirty('title');
+        $resource2->setDirty('body');
 
-        $this->assertEquals([
-            $resource1,
-            $resource2,
-        ], $this->endpoint->newEntities([
+        $entities = $this->endpoint->newEntities([
             [
                 'title' => 'New entity',
                 'body' => 'New entity body',
@@ -241,7 +253,12 @@ class EndpointTest extends TestCase
                 'title' => 'Second new entity',
                 'body' => 'Second new entity body',
             ],
-        ]));
+        ]);
+
+        $this->assertEquals([
+            $resource1,
+            $resource2,
+        ], $entities);
     }
 
     public function testDefaultConnectionName()
@@ -389,7 +406,7 @@ class EndpointTest extends TestCase
         $endpoint->setSchema($schema);
         $this->assertEquals(
             new Schema('another', $schema),
-            $endpoint->getSchema()
+            $endpoint->getSchema(),
         );
     }
 
@@ -462,7 +479,7 @@ class EndpointTest extends TestCase
     {
         $this->expectException(BadMethodCallException::class);
 
-        $query = $this->getMockBuilder(Query::class)
+        $query = $this->getMockBuilder(ReadQuery::class)
             ->setConstructorArgs([new TestWebservice(), $this->endpoint])
             ->getMock();
 

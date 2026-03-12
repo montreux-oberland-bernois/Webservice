@@ -1,23 +1,20 @@
 <?php
 declare(strict_types=1);
 
-namespace Muffin\Webservice\Test\TestCase;
+namespace Muffin\Webservice\Test\TestCase\Datasource\Query;
 
 use Cake\Database\Expression\ComparisonExpression;
 use Cake\TestSuite\TestCase;
-use Muffin\Webservice\Datasource\Query;
+use Muffin\Webservice\Datasource\Query\ReadQuery;
 use Muffin\Webservice\Datasource\ResultSet;
 use Muffin\Webservice\Model\Endpoint;
-use Muffin\Webservice\Model\Resource;
+use Muffin\Webservice\Test\TestCase\Fixture\ResourceFixture;
 use TestApp\Webservice\StaticWebservice;
-use UnexpectedValueException;
 
-class QueryTest extends TestCase
+class ReadQueryTest extends TestCase
 {
-    /**
-     * @var Query
-     */
-    public $query;
+    protected ReadQuery $query;
+    protected array $fixtures = [];
 
     /**
      * @inheritDoc
@@ -26,30 +23,8 @@ class QueryTest extends TestCase
     {
         parent::setUp();
 
-        $this->query = new Query(new StaticWebservice(), new Endpoint());
-    }
-
-    public function testAction()
-    {
-        $this->assertNull($this->query->clause('action'));
-
-        $this->assertEquals($this->query, $this->query->action(Query::ACTION_READ));
-        $this->assertEquals(Query::ACTION_READ, $this->query->clause('action'));
-    }
-
-    public function testActionMethods()
-    {
-        $this->assertEquals($this->query, $this->query->create());
-        $this->assertEquals(Query::ACTION_CREATE, $this->query->clause('action'));
-
-        $this->assertEquals($this->query, $this->query->read());
-        $this->assertEquals(Query::ACTION_READ, $this->query->clause('action'));
-
-        $this->assertEquals($this->query, $this->query->update());
-        $this->assertEquals(Query::ACTION_UPDATE, $this->query->clause('action'));
-
-        $this->assertEquals($this->query, $this->query->delete());
-        $this->assertEquals(Query::ACTION_DELETE, $this->query->clause('action'));
+        $this->query = new ReadQuery(new StaticWebservice(), new Endpoint());
+        $this->fixtures = ResourceFixture::getFixtures();
     }
 
     public function testAliasField()
@@ -57,24 +32,14 @@ class QueryTest extends TestCase
         $this->assertEquals(['field' => 'field'], $this->query->aliasField('field'));
     }
 
-    public function testCountNonReadAction()
-    {
-        $this->assertEquals(0, $this->query->count());
-    }
-
     public function testCount()
     {
-        $this->query->read();
-
         $this->assertEquals(3, $this->query->count());
     }
 
     public function testFirst()
     {
-        $this->assertEquals(new Resource([
-            'id' => 1,
-            'title' => 'Hello World',
-        ]), $this->query->first());
+        $this->assertEquals($this->fixtures[0], $this->query->first());
     }
 
     public function testApplyOptions()
@@ -109,27 +74,6 @@ class QueryTest extends TestCase
         $this->assertIsCallable($debugInfo['formatters'][0]);
     }
 
-    public function testSetInvalidAction()
-    {
-        $this->expectException(UnexpectedValueException::class);
-
-        $this->query->read();
-
-        $this->query->set([]);
-    }
-
-    public function testSet()
-    {
-        $this->query->update();
-
-        $this->assertEquals($this->query, $this->query->set([
-            'field' => 'value',
-        ]));
-        $this->assertEquals([
-            'field' => 'value',
-        ], $this->query->set());
-    }
-
     public function testPage()
     {
         $this->assertEquals($this->query, $this->query->page(10));
@@ -152,9 +96,9 @@ class QueryTest extends TestCase
         $this->assertEquals(10, $this->query->clause('offset'));
     }
 
-    public function testOrder()
+    public function testOrderBy()
     {
-        $this->assertEquals($this->query, $this->query->order([
+        $this->assertEquals($this->query, $this->query->orderBy([
             'field' => 'ASC',
         ]));
 
@@ -163,7 +107,7 @@ class QueryTest extends TestCase
         ], $this->query->clause('order'));
     }
 
-    public function testExecuteTwice()
+    public function testAllTwice()
     {
         $mockWebservice = $this
             ->getMockBuilder('\TestApp\Webservice\StaticWebservice')
@@ -174,41 +118,25 @@ class QueryTest extends TestCase
 
         $mockWebservice->expects($this->once())
             ->method('execute')
-            ->will($this->returnValue(new ResultSet([
-                new Resource([
-                    'id' => 1,
-                    'title' => 'Hello World',
-                ]),
-                new Resource([
-                    'id' => 2,
-                    'title' => 'New ORM',
-                ]),
-                new Resource([
-                    'id' => 3,
-                    'title' => 'Webservices',
-                ]),
-            ], 3)));
+            ->willReturn(new ResultSet($this->fixtures, 3));
 
         $this->query
-            ->setWebservice($mockWebservice)
-            ->action(Query::ACTION_READ);
+            ->setWebservice($mockWebservice);
 
-        $this->query->execute();
+        $this->query->all();
 
         // This webservice shouldn't be called a second time
-        $this->query->execute();
+        $this->query->all();
     }
 
     public function testDebugInfo()
     {
         $this->assertEquals([
             '(help)' => 'This is a Query object, to get the results execute or iterate it.',
-            'action' => null,
             'formatters' => [],
             'offset' => null,
             'page' => null,
             'limit' => null,
-            'set' => [],
             'sort' => [],
             'extraOptions' => [],
             'conditions' => [],
@@ -259,14 +187,6 @@ class QueryTest extends TestCase
         $this->assertSame($secondFields, $this->query->clause('select'));
     }
 
-    public function testSelectWithString()
-    {
-        $field = 'examples';
-        $this->query->select($field);
-
-        $this->assertSame([$field], $this->query->clause('select'));
-    }
-
     public function testSelectWithExpression()
     {
         $exp = new ComparisonExpression('upvotes', 50, 'integer', '>=');
@@ -284,21 +204,11 @@ class QueryTest extends TestCase
     {
         $fields = ['id', 'username', 'email', 'biography'];
 
-        $callable = function (Query $query) use ($fields) {
+        $callable = function () use ($fields) {
             return $fields;
         };
         $this->query->select($callable);
 
         $this->assertSame($fields, $this->query->clause('select'));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function tearDown(): void
-    {
-        parent::tearDown();
-
-        $this->query = null;
     }
 }

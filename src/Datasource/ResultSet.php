@@ -5,7 +5,12 @@ namespace Muffin\Webservice\Datasource;
 
 use Cake\Collection\CollectionTrait;
 use Cake\Datasource\ResultSetInterface;
+use Muffin\Webservice\Model\Resource;
 
+/**
+ * @template T of \Cake\Datasource\EntityInterface|array
+ * @implements \Cake\Datasource\ResultSetInterface<T>
+ */
 class ResultSet implements ResultSetInterface
 {
     use CollectionTrait;
@@ -15,28 +20,28 @@ class ResultSet implements ResultSetInterface
      *
      * @var int
      */
-    protected $_index = 0;
+    protected int $_index = 0;
 
     /**
      * Last record fetched from the statement
      *
-     * @var array
+     * @var Resource
      */
-    protected $_current;
+    protected Resource $_current;
 
     /**
      * Results that have been fetched or hydrated into the results.
      *
      * @var array
      */
-    protected $_results = [];
+    protected array $_results = [];
 
     /**
      * Total number of results
      *
      * @var int|null
      */
-    protected $_total;
+    protected ?int $_total = null;
 
     /**
      * Construct the ResultSet
@@ -55,9 +60,9 @@ class ResultSet implements ResultSetInterface
      *
      * Part of Iterator interface.
      *
-     * @return array|object
+     * @return Resource
      */
-    public function current()
+    public function current(): Resource
     {
         return $this->_current;
     }
@@ -67,10 +72,9 @@ class ResultSet implements ResultSetInterface
      *
      * Part of Iterator interface.
      *
-     * @throws \Cake\Database\Exception
      * @return void
      */
-    public function rewind()
+    public function rewind(): void
     {
         $this->_index = 0;
     }
@@ -82,7 +86,7 @@ class ResultSet implements ResultSetInterface
      *
      * @return string Serialized object
      */
-    public function serialize()
+    public function serialize(): string
     {
         while ($this->valid()) {
             $this->next();
@@ -98,7 +102,7 @@ class ResultSet implements ResultSetInterface
      *
      * @return bool
      */
-    public function valid()
+    public function valid(): bool
     {
         if (!isset($this->_results[$this->key()])) {
             return false;
@@ -116,7 +120,7 @@ class ResultSet implements ResultSetInterface
      *
      * @return int
      */
-    public function key()
+    public function key(): int
     {
         return $this->_index;
     }
@@ -128,7 +132,7 @@ class ResultSet implements ResultSetInterface
      *
      * @return void
      */
-    public function next()
+    public function next(): void
     {
         $this->_index++;
     }
@@ -141,7 +145,7 @@ class ResultSet implements ResultSetInterface
      * @param string $serialized Serialized object
      * @return void
      */
-    public function unserialize($serialized)
+    public function unserialize(string $serialized): void
     {
         $this->_results = unserialize($serialized);
     }
